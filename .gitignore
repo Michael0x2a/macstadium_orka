@@ -1,0 +1,6 @@
+# Build output
+build/
+
+# Files the README suggests creating to store secrets
+my-api-config.json
+my-user-config.json
