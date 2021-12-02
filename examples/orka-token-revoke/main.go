@@ -37,7 +37,7 @@ func orkaTokenRevoke(ctx context.Context, config utils.APIConfig) error {
 	if err != nil {
 		return fmt.Errorf("could not construct client: %w", err)
 	}
-	
+
 	resp, err := client.RevokeTokenWithResponse(ctx, func(ctx context.Context, req *http.Request) error {
 		req.Header.Set("Token", config.BearerToken)
 		return nil

@@ -35,9 +35,9 @@ func orkaTokenCreate(ctx context.Context, config utils.UserConfig) error {
 	if err != nil {
 		return fmt.Errorf("could not construct client: %w", err)
 	}
-	
+
 	resp, err := client.CreateTokenWithResponse(ctx, orka.CreateTokenJSONRequestBody{
-		Email: &config.Email,
+		Email:    &config.Email,
 		Password: &config.Password,
 	})
 	if err != nil {

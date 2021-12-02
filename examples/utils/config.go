@@ -34,8 +34,8 @@ func ParseAPIConfig(configPath string) (APIConfig, error) {
 // UserConfig contains all information needed to create a new user and generate a token.
 type UserConfig struct {
 	ServerURL string `json:"server_url"`
-	Email string `json:"email"`
-	Password string `json:"password"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 }
 
 func ParseUserConfig(path string) (UserConfig, error) {
@@ -52,4 +52,3 @@ func ParseUserConfig(path string) (UserConfig, error) {
 
 	return config, nil
 }
-

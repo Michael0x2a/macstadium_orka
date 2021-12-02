@@ -8,7 +8,7 @@ import (
 
 type Authentication struct {
 	BearerToken string
-	LicenseKey string
+	LicenseKey  string
 }
 
 // NewOrkaClient creates a client for the Orka API using the provided
