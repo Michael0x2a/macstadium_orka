@@ -99,8 +99,11 @@ type ClientInterface interface {
 	// DeleteLogs request
 	DeleteLogs(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ListLogs request
-	ListLogs(ctx context.Context, params *ListLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ListLogs1 request
+	ListLogs1(ctx context.Context, params *ListLogs1Params, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CalculateImageChecksum request
+	CalculateImageChecksum(ctx context.Context, baseImage string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CommitChangesToTheBaseImage request with any body
 	CommitChangesToTheBaseImageWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -116,6 +119,9 @@ type ClientInterface interface {
 	DeleteImageWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	DeleteImage(ctx context.Context, body DeleteImageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DownloadAnImage request
+	DownloadAnImage(ctx context.Context, baseImage string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GenerateEmptyStorage request with any body
 	GenerateEmptyStorageWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -215,6 +221,9 @@ type ClientInterface interface {
 
 	DedicateNode(ctx context.Context, userGroup string, body DedicateNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ListNodes request
+	ListNodes(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ListAllNodesAdmin request
 	ListAllNodesAdmin(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -230,6 +239,16 @@ type ClientInterface interface {
 
 	// CheckNodeStatus request
 	CheckNodeStatus(ctx context.Context, node string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UntagNode request with any body
+	UntagNodeWithBody(ctx context.Context, nodeTag string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UntagNode(ctx context.Context, nodeTag string, body UntagNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// TagNode request with any body
+	TagNodeWithBody(ctx context.Context, nodeTag string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	TagNode(ctx context.Context, nodeTag string, body TagNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ListPorts request
 	ListPorts(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -417,8 +436,20 @@ func (c *Client) DeleteLogs(ctx context.Context, reqEditors ...RequestEditorFn) 
 	return c.Client.Do(req)
 }
 
-func (c *Client) ListLogs(ctx context.Context, params *ListLogsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewListLogsRequest(c.Server, params)
+func (c *Client) ListLogs1(ctx context.Context, params *ListLogs1Params, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListLogs1Request(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CalculateImageChecksum(ctx context.Context, baseImage string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCalculateImageChecksumRequest(c.Server, baseImage)
 	if err != nil {
 		return nil, err
 	}
@@ -491,6 +522,18 @@ func (c *Client) DeleteImageWithBody(ctx context.Context, contentType string, bo
 
 func (c *Client) DeleteImage(ctx context.Context, body DeleteImageJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteImageRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DownloadAnImage(ctx context.Context, baseImage string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDownloadAnImageRequest(c.Server, baseImage)
 	if err != nil {
 		return nil, err
 	}
@@ -957,6 +1000,18 @@ func (c *Client) DedicateNode(ctx context.Context, userGroup string, body Dedica
 	return c.Client.Do(req)
 }
 
+func (c *Client) ListNodes(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListNodesRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) ListAllNodesAdmin(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewListAllNodesAdminRequest(c.Server)
 	if err != nil {
@@ -1019,6 +1074,54 @@ func (c *Client) EnableSandbox(ctx context.Context, body EnableSandboxJSONReques
 
 func (c *Client) CheckNodeStatus(ctx context.Context, node string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCheckNodeStatusRequest(c.Server, node)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UntagNodeWithBody(ctx context.Context, nodeTag string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUntagNodeRequestWithBody(c.Server, nodeTag, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UntagNode(ctx context.Context, nodeTag string, body UntagNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUntagNodeRequest(c.Server, nodeTag, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TagNodeWithBody(ctx context.Context, nodeTag string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTagNodeRequestWithBody(c.Server, nodeTag, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) TagNode(ctx context.Context, nodeTag string, body TagNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTagNodeRequest(c.Server, nodeTag, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1794,8 +1897,8 @@ func NewDeleteLogsRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewListLogsRequest generates requests for ListLogs
-func NewListLogsRequest(server string, params *ListLogsParams) (*http.Request, error) {
+// NewListLogs1Request generates requests for ListLogs1
+func NewListLogs1Request(server string, params *ListLogs1Params) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1834,6 +1937,40 @@ func NewListLogsRequest(server string, params *ListLogsParams) (*http.Request, e
 	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCalculateImageChecksumRequest generates requests for CalculateImageChecksum
+func NewCalculateImageChecksumRequest(server string, baseImage string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "baseImage", runtime.ParamLocationPath, baseImage)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/resources/image/checksum/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1957,6 +2094,40 @@ func NewDeleteImageRequestWithBody(server string, contentType string, body io.Re
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDownloadAnImageRequest generates requests for DownloadAnImage
+func NewDownloadAnImageRequest(server string, baseImage string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "baseImage", runtime.ParamLocationPath, baseImage)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/resources/image/download/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -2774,6 +2945,33 @@ func NewDedicateNodeRequestWithBody(server string, userGroup string, contentType
 	return req, nil
 }
 
+// NewListNodesRequest generates requests for ListNodes
+func NewListNodesRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/resources/node/list")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewListAllNodesAdminRequest generates requests for ListAllNodesAdmin
 func NewListAllNodesAdminRequest(server string) (*http.Request, error) {
 	var err error
@@ -2783,7 +2981,7 @@ func NewListAllNodesAdminRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/resources/node/list")
+	operationPath := fmt.Sprintf("/resources/node/list/all")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2911,6 +3109,100 @@ func NewCheckNodeStatusRequest(server string, node string) (*http.Request, error
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewUntagNodeRequest calls the generic UntagNode builder with application/json body
+func NewUntagNodeRequest(server string, nodeTag string, body UntagNodeJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUntagNodeRequestWithBody(server, nodeTag, "application/json", bodyReader)
+}
+
+// NewUntagNodeRequestWithBody generates requests for UntagNode with any type of body
+func NewUntagNodeRequestWithBody(server string, nodeTag string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "nodeTag", runtime.ParamLocationPath, nodeTag)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/resources/node/tag/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewTagNodeRequest calls the generic TagNode builder with application/json body
+func NewTagNodeRequest(server string, nodeTag string, body TagNodeJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTagNodeRequestWithBody(server, nodeTag, "application/json", bodyReader)
+}
+
+// NewTagNodeRequestWithBody generates requests for TagNode with any type of body
+func NewTagNodeRequestWithBody(server string, nodeTag string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "nodeTag", runtime.ParamLocationPath, nodeTag)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/resources/node/tag/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -4246,8 +4538,11 @@ type ClientWithResponsesInterface interface {
 	// DeleteLogs request
 	DeleteLogsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteLogsResponse, error)
 
-	// ListLogs request
-	ListLogsWithResponse(ctx context.Context, params *ListLogsParams, reqEditors ...RequestEditorFn) (*ListLogsResponse, error)
+	// ListLogs1 request
+	ListLogs1WithResponse(ctx context.Context, params *ListLogs1Params, reqEditors ...RequestEditorFn) (*ListLogs1Response, error)
+
+	// CalculateImageChecksum request
+	CalculateImageChecksumWithResponse(ctx context.Context, baseImage string, reqEditors ...RequestEditorFn) (*CalculateImageChecksumResponse, error)
 
 	// CommitChangesToTheBaseImage request with any body
 	CommitChangesToTheBaseImageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CommitChangesToTheBaseImageResponse, error)
@@ -4263,6 +4558,9 @@ type ClientWithResponsesInterface interface {
 	DeleteImageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteImageResponse, error)
 
 	DeleteImageWithResponse(ctx context.Context, body DeleteImageJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteImageResponse, error)
+
+	// DownloadAnImage request
+	DownloadAnImageWithResponse(ctx context.Context, baseImage string, reqEditors ...RequestEditorFn) (*DownloadAnImageResponse, error)
 
 	// GenerateEmptyStorage request with any body
 	GenerateEmptyStorageWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*GenerateEmptyStorageResponse, error)
@@ -4362,6 +4660,9 @@ type ClientWithResponsesInterface interface {
 
 	DedicateNodeWithResponse(ctx context.Context, userGroup string, body DedicateNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*DedicateNodeResponse, error)
 
+	// ListNodes request
+	ListNodesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListNodesResponse, error)
+
 	// ListAllNodesAdmin request
 	ListAllNodesAdminWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListAllNodesAdminResponse, error)
 
@@ -4377,6 +4678,16 @@ type ClientWithResponsesInterface interface {
 
 	// CheckNodeStatus request
 	CheckNodeStatusWithResponse(ctx context.Context, node string, reqEditors ...RequestEditorFn) (*CheckNodeStatusResponse, error)
+
+	// UntagNode request with any body
+	UntagNodeWithBodyWithResponse(ctx context.Context, nodeTag string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UntagNodeResponse, error)
+
+	UntagNodeWithResponse(ctx context.Context, nodeTag string, body UntagNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*UntagNodeResponse, error)
+
+	// TagNode request with any body
+	TagNodeWithBodyWithResponse(ctx context.Context, nodeTag string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TagNodeResponse, error)
+
+	TagNodeWithResponse(ctx context.Context, nodeTag string, body TagNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*TagNodeResponse, error)
 
 	// ListPorts request
 	ListPortsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListPortsResponse, error)
@@ -4608,97 +4919,58 @@ func (r DeleteLogsResponse) StatusCode() int {
 	return 0
 }
 
-type ListLogsResponse struct {
+type ListLogs1Response struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Errors *[]interface{}          `json:"errors,omitempty"`
-		Help   *map[string]interface{} `json:"help,omitempty"`
-		Logs   *[]struct {
-			CreatedAt  *string `json:"createdAt,omitempty"`
-			Id         *string `json:"id,omitempty"`
-			LogVersion *string `json:"logVersion,omitempty"`
-			Request    *struct {
-				Body    *map[string]interface{} `json:"body,omitempty"`
-				Headers *struct {
-					Accept           *string `json:"accept,omitempty"`
-					AcceptEncoding   *string `json:"accept-encoding,omitempty"`
-					Connection       *string `json:"connection,omitempty"`
-					ContentLength    *string `json:"content-length,omitempty"`
-					ContentType      *string `json:"content-type,omitempty"`
-					Host             *string `json:"host,omitempty"`
-					Platform         *string `json:"platform,omitempty"`
-					Release          *string `json:"release,omitempty"`
-					UserAgent        *string `json:"user-agent,omitempty"`
-					XCliVersion      *string `json:"x-cli-version,omitempty"`
-					XForwardedFor    *string `json:"x-forwarded-for,omitempty"`
-					XForwardedHost   *string `json:"x-forwarded-host,omitempty"`
-					XForwardedPort   *string `json:"x-forwarded-port,omitempty"`
-					XForwardedProto  *string `json:"x-forwarded-proto,omitempty"`
-					XForwardedServer *string `json:"x-forwarded-server,omitempty"`
-					XRealIp          *string `json:"x-real-ip,omitempty"`
-				} `json:"headers,omitempty"`
-				Method *string `json:"method,omitempty"`
-				Url    *string `json:"url,omitempty"`
-			} `json:"request,omitempty"`
-			Response *struct {
-				Body *struct {
-					ApiVersion    *string `json:"api_version,omitempty"`
-					Authenticated *bool   `json:"authenticated,omitempty"`
-					Configs       *[]struct {
-						AttachedDisk   *string  `json:"attached_disk,omitempty"`
-						GpuPassthrough *bool    `json:"gpu_passthrough,omitempty"`
-						IoBoost        *bool    `json:"io_boost,omitempty"`
-						IsoImage       *string  `json:"iso_image,omitempty"`
-						OrkaBaseImage  *string  `json:"orka_base_image,omitempty"`
-						OrkaCpuCore    *float32 `json:"orka_cpu_core,omitempty"`
-						OrkaVmName     *string  `json:"orka_vm_name,omitempty"`
-						Owner          *string  `json:"owner,omitempty"`
-						UseSavedState  *bool    `json:"use_saved_state,omitempty"`
-						VcpuCount      *float32 `json:"vcpu_count,omitempty"`
-						VncConsole     *bool    `json:"vnc_console,omitempty"`
-					} `json:"configs,omitempty"`
-					Email                         *string                 `json:"email,omitempty"`
-					Errors                        *[]interface{}          `json:"errors,omitempty"`
-					FailedVirtualMachineResources *[]interface{}          `json:"failed_virtual_machine_resources,omitempty"`
-					Help                          *map[string]interface{} `json:"help,omitempty"`
-					IsTokenRevoked                *bool                   `json:"is_token_revoked,omitempty"`
-					Message                       *string                 `json:"message,omitempty"`
-					VirtualMachineResources       *[]struct {
-						BaseImage             *string  `json:"base_image,omitempty"`
-						ConfigurationTemplate *string  `json:"configuration_template,omitempty"`
-						Cpu                   *float32 `json:"cpu,omitempty"`
-						GpuPassthrough        *bool    `json:"gpu_passthrough,omitempty"`
-						Image                 *string  `json:"image,omitempty"`
-						IoBoost               *bool    `json:"io_boost,omitempty"`
-						Owner                 *string  `json:"owner,omitempty"`
-						UseSavedState         *bool    `json:"use_saved_state,omitempty"`
-						Vcpu                  *float32 `json:"vcpu,omitempty"`
-						VirtualMachineName    *string  `json:"virtual_machine_name,omitempty"`
-						VmDeploymentStatus    *string  `json:"vm_deployment_status,omitempty"`
-					} `json:"virtual_machine_resources,omitempty"`
-				} `json:"body,omitempty"`
-				Headers *struct {
-					AccessControlAllowOrigin *string      `json:"access-control-allow-origin,omitempty"`
-					ContentLength            *interface{} `json:"content-length,omitempty"`
-					ContentSecurityPolicy    *string      `json:"content-security-policy,omitempty"`
-					ContentType              *string      `json:"content-type,omitempty"`
-					Etag                     *string      `json:"etag,omitempty"`
-					XContentTypeOptions      *string      `json:"x-content-type-options,omitempty"`
-				} `json:"headers,omitempty"`
-				StatusCode *float32 `json:"statusCode,omitempty"`
-			} `json:"response,omitempty"`
-			User *struct {
-				Email *string `json:"email,omitempty"`
-				Id    *string `json:"id,omitempty"`
-			} `json:"user,omitempty"`
-		} `json:"logs,omitempty"`
-		Message *string `json:"message,omitempty"`
+		Data *struct {
+			Result *[]struct {
+				Stream *struct {
+					LogType *string `json:"log_type,omitempty"`
+					Service *string `json:"service,omitempty"`
+				} `json:"stream,omitempty"`
+				Values *[][]string `json:"values,omitempty"`
+			} `json:"result,omitempty"`
+			ResultType *string `json:"resultType,omitempty"`
+			Stats      *struct {
+				Ingester *struct {
+					CompressedBytes    *float32 `json:"compressedBytes,omitempty"`
+					DecompressedBytes  *float32 `json:"decompressedBytes,omitempty"`
+					DecompressedLines  *float32 `json:"decompressedLines,omitempty"`
+					HeadChunkBytes     *float32 `json:"headChunkBytes,omitempty"`
+					HeadChunkLines     *float32 `json:"headChunkLines,omitempty"`
+					TotalBatches       *float32 `json:"totalBatches,omitempty"`
+					TotalChunksMatched *float32 `json:"totalChunksMatched,omitempty"`
+					TotalDuplicates    *float32 `json:"totalDuplicates,omitempty"`
+					TotalLinesSent     *float32 `json:"totalLinesSent,omitempty"`
+					TotalReached       *float32 `json:"totalReached,omitempty"`
+				} `json:"ingester,omitempty"`
+				Store *struct {
+					ChunksDownloadTime    *float32 `json:"chunksDownloadTime,omitempty"`
+					CompressedBytes       *float32 `json:"compressedBytes,omitempty"`
+					DecompressedBytes     *float32 `json:"decompressedBytes,omitempty"`
+					DecompressedLines     *float32 `json:"decompressedLines,omitempty"`
+					HeadChunkBytes        *float32 `json:"headChunkBytes,omitempty"`
+					HeadChunkLines        *float32 `json:"headChunkLines,omitempty"`
+					TotalChunksDownloaded *float32 `json:"totalChunksDownloaded,omitempty"`
+					TotalChunksRef        *float32 `json:"totalChunksRef,omitempty"`
+					TotalDuplicates       *float32 `json:"totalDuplicates,omitempty"`
+				} `json:"store,omitempty"`
+				Summary *struct {
+					BytesProcessedPerSecond *float32 `json:"bytesProcessedPerSecond,omitempty"`
+					ExecTime                *float32 `json:"execTime,omitempty"`
+					LinesProcessedPerSecond *float32 `json:"linesProcessedPerSecond,omitempty"`
+					TotalBytesProcessed     *float32 `json:"totalBytesProcessed,omitempty"`
+					TotalLinesProcessed     *float32 `json:"totalLinesProcessed,omitempty"`
+				} `json:"summary,omitempty"`
+			} `json:"stats,omitempty"`
+		} `json:"data,omitempty"`
+		Status *string `json:"status,omitempty"`
 	}
 }
 
 // Status returns HTTPResponse.Status
-func (r ListLogsResponse) Status() string {
+func (r ListLogs1Response) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -4706,7 +4978,47 @@ func (r ListLogsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListLogsResponse) StatusCode() int {
+func (r ListLogs1Response) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CalculateImageChecksumResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Checksum *string                 `json:"checksum,omitempty"`
+		Errors   *[]interface{}          `json:"errors,omitempty"`
+		Help     *map[string]interface{} `json:"help,omitempty"`
+		Image    *string                 `json:"image,omitempty"`
+		Message  *string                 `json:"message,omitempty"`
+	}
+	JSON202 *struct {
+		Errors  *[]interface{}          `json:"errors,omitempty"`
+		Help    *map[string]interface{} `json:"help,omitempty"`
+		Message *string                 `json:"message,omitempty"`
+	}
+	JSON404 *struct {
+		Errors *[]struct {
+			Message *string `json:"message,omitempty"`
+		} `json:"errors,omitempty"`
+		Help    *map[string]interface{} `json:"help,omitempty"`
+		Message *string                 `json:"message,omitempty"`
+	}
+}
+
+// Status returns HTTPResponse.Status
+func (r CalculateImageChecksumResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CalculateImageChecksumResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -4785,6 +5097,34 @@ func (r DeleteImageResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r DeleteImageResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DownloadAnImageResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON404      *struct {
+		Errors *[]struct {
+			Message *string `json:"message,omitempty"`
+		} `json:"errors,omitempty"`
+		Help    *map[string]interface{} `json:"help,omitempty"`
+		Message *string                 `json:"message,omitempty"`
+	}
+}
+
+// Status returns HTTPResponse.Status
+func (r DownloadAnImageResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DownloadAnImageResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -5395,6 +5735,61 @@ func (r DedicateNodeResponse) StatusCode() int {
 	return 0
 }
 
+type ListNodesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Errors *[]interface{} `json:"errors,omitempty"`
+		Help   *struct {
+			CheckOrkaNodeStatus               *string `json:"check_orka_node_status,omitempty"`
+			CreateVirtualMachineConfiguration *string `json:"create_virtual_machine_configuration,omitempty"`
+			DeployVirtualMachine              *string `json:"deploy_virtual_machine,omitempty"`
+			RequiredRequestDataForCreate      *struct {
+				OrkaBaseImg *string `json:"orka_base_img,omitempty"`
+				OrkaImage   *string `json:"orka_image,omitempty"`
+				OrkaVmName  *string `json:"orka_vm_name,omitempty"`
+			} `json:"required_request_data_for_create,omitempty"`
+			RequiredRequestDataForDeploy *struct {
+				OrkaNodeName *string `json:"orka_node_name,omitempty"`
+				OrkaVmName   *string `json:"orka_vm_name,omitempty"`
+			} `json:"required_request_data_for_deploy,omitempty"`
+		} `json:"help,omitempty"`
+		Message *string `json:"message,omitempty"`
+		Nodes   *[]struct {
+			Address         *string        `json:"address,omitempty"`
+			AllocatableCpu  *float32       `json:"allocatable_cpu,omitempty"`
+			AllocatableGpu  *string        `json:"allocatable_gpu,omitempty"`
+			AvailableCpu    *float32       `json:"available_cpu,omitempty"`
+			AvailableGpu    *string        `json:"available_gpu,omitempty"`
+			AvailableMemory *string        `json:"available_memory,omitempty"`
+			HostIP          *string        `json:"hostIP,omitempty"`
+			HostName        *string        `json:"host_name,omitempty"`
+			Name            *string        `json:"name,omitempty"`
+			NodeType        *string        `json:"node_type,omitempty"`
+			OrkaTags        *[]interface{} `json:"orka_tags,omitempty"`
+			State           *string        `json:"state,omitempty"`
+			TotalCpu        *float32       `json:"total_cpu,omitempty"`
+			TotalMemory     *string        `json:"total_memory,omitempty"`
+		} `json:"nodes,omitempty"`
+	}
+}
+
+// Status returns HTTPResponse.Status
+func (r ListNodesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListNodesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type ListAllNodesAdminResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5477,8 +5872,10 @@ type CheckNodeStatusResponse struct {
 		Message    *string                 `json:"message,omitempty"`
 		NodeStatus *struct {
 			Cpu      *float32 `json:"cpu,omitempty"`
+			Gpu      *float32 `json:"gpu,omitempty"`
 			Memory   *string  `json:"memory,omitempty"`
 			NodeName *string  `json:"nodeName,omitempty"`
+			NodeType *string  `json:"nodeType,omitempty"`
 			Sandbox  *string  `json:"sandbox,omitempty"`
 			Status   *string  `json:"status,omitempty"`
 		} `json:"node_status,omitempty"`
@@ -5495,6 +5892,48 @@ func (r CheckNodeStatusResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r CheckNodeStatusResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UntagNodeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r UntagNodeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UntagNodeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type TagNodeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r TagNodeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TagNodeResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -5593,17 +6032,22 @@ type ListYourVmConfigurationsResponse struct {
 	HTTPResponse *http.Response
 	JSON200      *struct {
 		Configs *[]struct {
-			AttachedDisk   *string  `json:"attached_disk,omitempty"`
-			GpuPassthrough *bool    `json:"gpu_passthrough,omitempty"`
-			IoBoost        *bool    `json:"io_boost,omitempty"`
-			IsoImage       *string  `json:"iso_image,omitempty"`
-			OrkaBaseImage  *string  `json:"orka_base_image,omitempty"`
-			OrkaCpuCore    *float32 `json:"orka_cpu_core,omitempty"`
-			OrkaVmName     *string  `json:"orka_vm_name,omitempty"`
-			Owner          *string  `json:"owner,omitempty"`
-			UseSavedState  *bool    `json:"use_saved_state,omitempty"`
-			VcpuCount      *float32 `json:"vcpu_count,omitempty"`
-			VncConsole     *bool    `json:"vnc_console,omitempty"`
+			AttachedDisk   *string      `json:"attached_disk,omitempty"`
+			GpuPassthrough *bool        `json:"gpu_passthrough,omitempty"`
+			IoBoost        *bool        `json:"io_boost,omitempty"`
+			IsoImage       *string      `json:"iso_image,omitempty"`
+			Memory         *interface{} `json:"memory,omitempty"`
+			OrkaBaseImage  *string      `json:"orka_base_image,omitempty"`
+			OrkaCpuCore    *float32     `json:"orka_cpu_core,omitempty"`
+			OrkaVmName     *string      `json:"orka_vm_name,omitempty"`
+			Owner          *string      `json:"owner,omitempty"`
+			Scheduler      *string      `json:"scheduler,omitempty"`
+			SystemSerial   *string      `json:"system_serial,omitempty"`
+			Tag            *string      `json:"tag,omitempty"`
+			TagRequired    *bool        `json:"tag_required,omitempty"`
+			UseSavedState  *bool        `json:"use_saved_state,omitempty"`
+			VcpuCount      *float32     `json:"vcpu_count,omitempty"`
+			VncConsole     *bool        `json:"vnc_console,omitempty"`
 		} `json:"configs,omitempty"`
 		Errors  *[]interface{}          `json:"errors,omitempty"`
 		Help    *map[string]interface{} `json:"help,omitempty"`
@@ -5664,10 +6108,15 @@ type GetVmConfigurationByNameResponse struct {
 			GpuPassthrough *bool    `json:"gpu_passthrough,omitempty"`
 			IoBoost        *bool    `json:"io_boost,omitempty"`
 			IsoImage       *string  `json:"iso_image,omitempty"`
+			Memory         *string  `json:"memory,omitempty"`
 			OrkaBaseImage  *string  `json:"orka_base_image,omitempty"`
 			OrkaCpuCore    *float32 `json:"orka_cpu_core,omitempty"`
 			OrkaVmName     *string  `json:"orka_vm_name,omitempty"`
 			Owner          *string  `json:"owner,omitempty"`
+			Scheduler      *string  `json:"scheduler,omitempty"`
+			SystemSerial   *string  `json:"system_serial,omitempty"`
+			Tag            *string  `json:"tag,omitempty"`
+			TagRequired    *bool    `json:"tag_required,omitempty"`
 			UseSavedState  *bool    `json:"use_saved_state,omitempty"`
 			VncConsole     *bool    `json:"vnc_console,omitempty"`
 		} `json:"configs,omitempty"`
@@ -5789,8 +6238,9 @@ type DeployVmConfigurationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Errors *[]interface{} `json:"errors,omitempty"`
-		Help   *struct {
+		Errors         *[]interface{} `json:"errors,omitempty"`
+		GpuPassthrough *bool          `json:"gpu_passthrough,omitempty"`
+		Help           *struct {
 			DataForVirtualMachineExecTasks *struct {
 				OrkaVmName *string `json:"orka_vm_name,omitempty"`
 			} `json:"data_for_virtual_machine_exec_tasks,omitempty"`
@@ -5801,12 +6251,14 @@ type DeployVmConfigurationResponse struct {
 			VirtualMachineVnc     *string `json:"virtual_machine_vnc,omitempty"`
 		} `json:"help,omitempty"`
 		HostCpu         *string        `json:"host_cpu,omitempty"`
+		IoBoost         *bool          `json:"io_boost,omitempty"`
 		Ip              *string        `json:"ip,omitempty"`
 		Message         *string        `json:"message,omitempty"`
 		PortWarnings    *[]interface{} `json:"port_warnings,omitempty"`
 		Ram             *string        `json:"ram,omitempty"`
 		ScreenSharePort *string        `json:"screen_share_port,omitempty"`
 		SshPort         *string        `json:"ssh_port,omitempty"`
+		UseSavedState   *bool          `json:"use_saved_state,omitempty"`
 		Vcpu            *string        `json:"vcpu,omitempty"`
 		VmId            *string        `json:"vm_id,omitempty"`
 		VncPort         *string        `json:"vnc_port,omitempty"`
@@ -6036,11 +6488,13 @@ type ListYourVMsResponse struct {
 				ConfigurationTemplate *string  `json:"configuration_template,omitempty"`
 				Cpu                   *float32 `json:"cpu,omitempty"`
 				CreationTimestamp     *string  `json:"creationTimestamp,omitempty"`
+				Gpu                   *string  `json:"gpu,omitempty"`
 				Image                 *string  `json:"image,omitempty"`
 				IoBoost               *bool    `json:"io_boost,omitempty"`
 				NodeLocation          *string  `json:"node_location,omitempty"`
 				NodeStatus            *string  `json:"node_status,omitempty"`
 				Owner                 *string  `json:"owner,omitempty"`
+				Replicas              *float32 `json:"replicas,omitempty"`
 				ReservedPorts         *[]struct {
 					GuestPort *float32 `json:"guest_port,omitempty"`
 					HostPort  *float32 `json:"host_port,omitempty"`
@@ -6048,6 +6502,8 @@ type ListYourVMsResponse struct {
 				} `json:"reserved_ports,omitempty"`
 				ScreenSharingPort  *string  `json:"screen_sharing_port,omitempty"`
 				SshPort            *string  `json:"ssh_port,omitempty"`
+				Tag                *string  `json:"tag,omitempty"`
+				TagRequired        *bool    `json:"tag_required,omitempty"`
 				UseSavedState      *bool    `json:"use_saved_state,omitempty"`
 				Vcpu               *float32 `json:"vcpu,omitempty"`
 				VirtualMachineId   *string  `json:"virtual_machine_id,omitempty"`
@@ -6056,6 +6512,8 @@ type ListYourVMsResponse struct {
 				VmStatus           *string  `json:"vm_status,omitempty"`
 				VncPort            *string  `json:"vnc_port,omitempty"`
 			} `json:"status,omitempty"`
+			Tag                *string  `json:"tag,omitempty"`
+			TagRequired        *bool    `json:"tag_required,omitempty"`
 			UseSavedState      *bool    `json:"use_saved_state,omitempty"`
 			Vcpu               *float32 `json:"vcpu,omitempty"`
 			VirtualMachineName *string  `json:"virtual_machine_name,omitempty"`
@@ -6133,11 +6591,13 @@ type ListAllVMsAdminResponse struct {
 				ConfigurationTemplate *string  `json:"configuration_template,omitempty"`
 				Cpu                   *float32 `json:"cpu,omitempty"`
 				CreationTimestamp     *string  `json:"creationTimestamp,omitempty"`
+				Gpu                   *string  `json:"gpu,omitempty"`
 				Image                 *string  `json:"image,omitempty"`
 				IoBoost               *bool    `json:"io_boost,omitempty"`
 				NodeLocation          *string  `json:"node_location,omitempty"`
 				NodeStatus            *string  `json:"node_status,omitempty"`
 				Owner                 *string  `json:"owner,omitempty"`
+				Replicas              *float32 `json:"replicas,omitempty"`
 				ReservedPorts         *[]struct {
 					GuestPort *float32 `json:"guest_port,omitempty"`
 					HostPort  *float32 `json:"host_port,omitempty"`
@@ -6145,6 +6605,8 @@ type ListAllVMsAdminResponse struct {
 				} `json:"reserved_ports,omitempty"`
 				ScreenSharingPort  *string  `json:"screen_sharing_port,omitempty"`
 				SshPort            *string  `json:"ssh_port,omitempty"`
+				Tag                *string  `json:"tag,omitempty"`
+				TagRequired        *bool    `json:"tag_required,omitempty"`
 				UseSavedState      *bool    `json:"use_saved_state,omitempty"`
 				Vcpu               *float32 `json:"vcpu,omitempty"`
 				VirtualMachineId   *string  `json:"virtual_machine_id,omitempty"`
@@ -6153,6 +6615,8 @@ type ListAllVMsAdminResponse struct {
 				VmStatus           *string  `json:"vm_status,omitempty"`
 				VncPort            *string  `json:"vnc_port,omitempty"`
 			} `json:"status,omitempty"`
+			Tag                *string  `json:"tag,omitempty"`
+			TagRequired        *bool    `json:"tag_required,omitempty"`
 			UseSavedState      *bool    `json:"use_saved_state,omitempty"`
 			Vcpu               *float32 `json:"vcpu,omitempty"`
 			VirtualMachineName *string  `json:"virtual_machine_name,omitempty"`
@@ -6198,11 +6662,13 @@ type ListUserSVMsAdminResponse struct {
 				ConfigurationTemplate *string  `json:"configuration_template,omitempty"`
 				Cpu                   *float32 `json:"cpu,omitempty"`
 				CreationTimestamp     *string  `json:"creationTimestamp,omitempty"`
+				Gpu                   *string  `json:"gpu,omitempty"`
 				Image                 *string  `json:"image,omitempty"`
 				IoBoost               *bool    `json:"io_boost,omitempty"`
 				NodeLocation          *string  `json:"node_location,omitempty"`
 				NodeStatus            *string  `json:"node_status,omitempty"`
 				Owner                 *string  `json:"owner,omitempty"`
+				Replicas              *float32 `json:"replicas,omitempty"`
 				ReservedPorts         *[]struct {
 					GuestPort *float32 `json:"guest_port,omitempty"`
 					HostPort  *float32 `json:"host_port,omitempty"`
@@ -6210,6 +6676,8 @@ type ListUserSVMsAdminResponse struct {
 				} `json:"reserved_ports,omitempty"`
 				ScreenSharingPort  *string  `json:"screen_sharing_port,omitempty"`
 				SshPort            *string  `json:"ssh_port,omitempty"`
+				Tag                *string  `json:"tag,omitempty"`
+				TagRequired        *bool    `json:"tag_required,omitempty"`
 				UseSavedState      *bool    `json:"use_saved_state,omitempty"`
 				Vcpu               *float32 `json:"vcpu,omitempty"`
 				VirtualMachineId   *string  `json:"virtual_machine_id,omitempty"`
@@ -6218,6 +6686,8 @@ type ListUserSVMsAdminResponse struct {
 				VmStatus           *string  `json:"vm_status,omitempty"`
 				VncPort            *string  `json:"vnc_port,omitempty"`
 			} `json:"status,omitempty"`
+			Tag                *string  `json:"tag,omitempty"`
+			TagRequired        *bool    `json:"tag_required,omitempty"`
 			UseSavedState      *bool    `json:"use_saved_state,omitempty"`
 			Vcpu               *float32 `json:"vcpu,omitempty"`
 			VirtualMachineName *string  `json:"virtual_machine_name,omitempty"`
@@ -6343,9 +6813,11 @@ type CheckUserSVmStatusAdminResponse struct {
 		Help                    *map[string]interface{} `json:"help,omitempty"`
 		Message                 *string                 `json:"message,omitempty"`
 		VirtualMachineResources *[]struct {
+			RAM                   *string  `json:"RAM,omitempty"`
 			BaseImage             *string  `json:"base_image,omitempty"`
 			ConfigurationTemplate *string  `json:"configuration_template,omitempty"`
 			Cpu                   *float32 `json:"cpu,omitempty"`
+			GpuPassthrough        *bool    `json:"gpu_passthrough,omitempty"`
 			Image                 *string  `json:"image,omitempty"`
 			IoBoost               *bool    `json:"io_boost,omitempty"`
 			Owner                 *string  `json:"owner,omitempty"`
@@ -6732,13 +7204,22 @@ func (c *ClientWithResponses) DeleteLogsWithResponse(ctx context.Context, reqEdi
 	return ParseDeleteLogsResponse(rsp)
 }
 
-// ListLogsWithResponse request returning *ListLogsResponse
-func (c *ClientWithResponses) ListLogsWithResponse(ctx context.Context, params *ListLogsParams, reqEditors ...RequestEditorFn) (*ListLogsResponse, error) {
-	rsp, err := c.ListLogs(ctx, params, reqEditors...)
+// ListLogs1WithResponse request returning *ListLogs1Response
+func (c *ClientWithResponses) ListLogs1WithResponse(ctx context.Context, params *ListLogs1Params, reqEditors ...RequestEditorFn) (*ListLogs1Response, error) {
+	rsp, err := c.ListLogs1(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListLogsResponse(rsp)
+	return ParseListLogs1Response(rsp)
+}
+
+// CalculateImageChecksumWithResponse request returning *CalculateImageChecksumResponse
+func (c *ClientWithResponses) CalculateImageChecksumWithResponse(ctx context.Context, baseImage string, reqEditors ...RequestEditorFn) (*CalculateImageChecksumResponse, error) {
+	rsp, err := c.CalculateImageChecksum(ctx, baseImage, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCalculateImageChecksumResponse(rsp)
 }
 
 // CommitChangesToTheBaseImageWithBodyWithResponse request with arbitrary body returning *CommitChangesToTheBaseImageResponse
@@ -6790,6 +7271,15 @@ func (c *ClientWithResponses) DeleteImageWithResponse(ctx context.Context, body 
 		return nil, err
 	}
 	return ParseDeleteImageResponse(rsp)
+}
+
+// DownloadAnImageWithResponse request returning *DownloadAnImageResponse
+func (c *ClientWithResponses) DownloadAnImageWithResponse(ctx context.Context, baseImage string, reqEditors ...RequestEditorFn) (*DownloadAnImageResponse, error) {
+	rsp, err := c.DownloadAnImage(ctx, baseImage, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDownloadAnImageResponse(rsp)
 }
 
 // GenerateEmptyStorageWithBodyWithResponse request with arbitrary body returning *GenerateEmptyStorageResponse
@@ -7118,6 +7608,15 @@ func (c *ClientWithResponses) DedicateNodeWithResponse(ctx context.Context, user
 	return ParseDedicateNodeResponse(rsp)
 }
 
+// ListNodesWithResponse request returning *ListNodesResponse
+func (c *ClientWithResponses) ListNodesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListNodesResponse, error) {
+	rsp, err := c.ListNodes(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListNodesResponse(rsp)
+}
+
 // ListAllNodesAdminWithResponse request returning *ListAllNodesAdminResponse
 func (c *ClientWithResponses) ListAllNodesAdminWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListAllNodesAdminResponse, error) {
 	rsp, err := c.ListAllNodesAdmin(ctx, reqEditors...)
@@ -7168,6 +7667,40 @@ func (c *ClientWithResponses) CheckNodeStatusWithResponse(ctx context.Context, n
 		return nil, err
 	}
 	return ParseCheckNodeStatusResponse(rsp)
+}
+
+// UntagNodeWithBodyWithResponse request with arbitrary body returning *UntagNodeResponse
+func (c *ClientWithResponses) UntagNodeWithBodyWithResponse(ctx context.Context, nodeTag string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UntagNodeResponse, error) {
+	rsp, err := c.UntagNodeWithBody(ctx, nodeTag, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUntagNodeResponse(rsp)
+}
+
+func (c *ClientWithResponses) UntagNodeWithResponse(ctx context.Context, nodeTag string, body UntagNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*UntagNodeResponse, error) {
+	rsp, err := c.UntagNode(ctx, nodeTag, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUntagNodeResponse(rsp)
+}
+
+// TagNodeWithBodyWithResponse request with arbitrary body returning *TagNodeResponse
+func (c *ClientWithResponses) TagNodeWithBodyWithResponse(ctx context.Context, nodeTag string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TagNodeResponse, error) {
+	rsp, err := c.TagNodeWithBody(ctx, nodeTag, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTagNodeResponse(rsp)
+}
+
+func (c *ClientWithResponses) TagNodeWithResponse(ctx context.Context, nodeTag string, body TagNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*TagNodeResponse, error) {
+	rsp, err := c.TagNode(ctx, nodeTag, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTagNodeResponse(rsp)
 }
 
 // ListPortsWithResponse request returning *ListPortsResponse
@@ -7753,15 +8286,15 @@ func ParseDeleteLogsResponse(rsp *http.Response) (*DeleteLogsResponse, error) {
 	return response, nil
 }
 
-// ParseListLogsResponse parses an HTTP response from a ListLogsWithResponse call
-func ParseListLogsResponse(rsp *http.Response) (*ListLogsResponse, error) {
+// ParseListLogs1Response parses an HTTP response from a ListLogs1WithResponse call
+func ParseListLogs1Response(rsp *http.Response) (*ListLogs1Response, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListLogsResponse{
+	response := &ListLogs1Response{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -7769,93 +8302,110 @@ func ParseListLogsResponse(rsp *http.Response) (*ListLogsResponse, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Errors *[]interface{}          `json:"errors,omitempty"`
-			Help   *map[string]interface{} `json:"help,omitempty"`
-			Logs   *[]struct {
-				CreatedAt  *string `json:"createdAt,omitempty"`
-				Id         *string `json:"id,omitempty"`
-				LogVersion *string `json:"logVersion,omitempty"`
-				Request    *struct {
-					Body    *map[string]interface{} `json:"body,omitempty"`
-					Headers *struct {
-						Accept           *string `json:"accept,omitempty"`
-						AcceptEncoding   *string `json:"accept-encoding,omitempty"`
-						Connection       *string `json:"connection,omitempty"`
-						ContentLength    *string `json:"content-length,omitempty"`
-						ContentType      *string `json:"content-type,omitempty"`
-						Host             *string `json:"host,omitempty"`
-						Platform         *string `json:"platform,omitempty"`
-						Release          *string `json:"release,omitempty"`
-						UserAgent        *string `json:"user-agent,omitempty"`
-						XCliVersion      *string `json:"x-cli-version,omitempty"`
-						XForwardedFor    *string `json:"x-forwarded-for,omitempty"`
-						XForwardedHost   *string `json:"x-forwarded-host,omitempty"`
-						XForwardedPort   *string `json:"x-forwarded-port,omitempty"`
-						XForwardedProto  *string `json:"x-forwarded-proto,omitempty"`
-						XForwardedServer *string `json:"x-forwarded-server,omitempty"`
-						XRealIp          *string `json:"x-real-ip,omitempty"`
-					} `json:"headers,omitempty"`
-					Method *string `json:"method,omitempty"`
-					Url    *string `json:"url,omitempty"`
-				} `json:"request,omitempty"`
-				Response *struct {
-					Body *struct {
-						ApiVersion    *string `json:"api_version,omitempty"`
-						Authenticated *bool   `json:"authenticated,omitempty"`
-						Configs       *[]struct {
-							AttachedDisk   *string  `json:"attached_disk,omitempty"`
-							GpuPassthrough *bool    `json:"gpu_passthrough,omitempty"`
-							IoBoost        *bool    `json:"io_boost,omitempty"`
-							IsoImage       *string  `json:"iso_image,omitempty"`
-							OrkaBaseImage  *string  `json:"orka_base_image,omitempty"`
-							OrkaCpuCore    *float32 `json:"orka_cpu_core,omitempty"`
-							OrkaVmName     *string  `json:"orka_vm_name,omitempty"`
-							Owner          *string  `json:"owner,omitempty"`
-							UseSavedState  *bool    `json:"use_saved_state,omitempty"`
-							VcpuCount      *float32 `json:"vcpu_count,omitempty"`
-							VncConsole     *bool    `json:"vnc_console,omitempty"`
-						} `json:"configs,omitempty"`
-						Email                         *string                 `json:"email,omitempty"`
-						Errors                        *[]interface{}          `json:"errors,omitempty"`
-						FailedVirtualMachineResources *[]interface{}          `json:"failed_virtual_machine_resources,omitempty"`
-						Help                          *map[string]interface{} `json:"help,omitempty"`
-						IsTokenRevoked                *bool                   `json:"is_token_revoked,omitempty"`
-						Message                       *string                 `json:"message,omitempty"`
-						VirtualMachineResources       *[]struct {
-							BaseImage             *string  `json:"base_image,omitempty"`
-							ConfigurationTemplate *string  `json:"configuration_template,omitempty"`
-							Cpu                   *float32 `json:"cpu,omitempty"`
-							GpuPassthrough        *bool    `json:"gpu_passthrough,omitempty"`
-							Image                 *string  `json:"image,omitempty"`
-							IoBoost               *bool    `json:"io_boost,omitempty"`
-							Owner                 *string  `json:"owner,omitempty"`
-							UseSavedState         *bool    `json:"use_saved_state,omitempty"`
-							Vcpu                  *float32 `json:"vcpu,omitempty"`
-							VirtualMachineName    *string  `json:"virtual_machine_name,omitempty"`
-							VmDeploymentStatus    *string  `json:"vm_deployment_status,omitempty"`
-						} `json:"virtual_machine_resources,omitempty"`
-					} `json:"body,omitempty"`
-					Headers *struct {
-						AccessControlAllowOrigin *string      `json:"access-control-allow-origin,omitempty"`
-						ContentLength            *interface{} `json:"content-length,omitempty"`
-						ContentSecurityPolicy    *string      `json:"content-security-policy,omitempty"`
-						ContentType              *string      `json:"content-type,omitempty"`
-						Etag                     *string      `json:"etag,omitempty"`
-						XContentTypeOptions      *string      `json:"x-content-type-options,omitempty"`
-					} `json:"headers,omitempty"`
-					StatusCode *float32 `json:"statusCode,omitempty"`
-				} `json:"response,omitempty"`
-				User *struct {
-					Email *string `json:"email,omitempty"`
-					Id    *string `json:"id,omitempty"`
-				} `json:"user,omitempty"`
-			} `json:"logs,omitempty"`
-			Message *string `json:"message,omitempty"`
+			Data *struct {
+				Result *[]struct {
+					Stream *struct {
+						LogType *string `json:"log_type,omitempty"`
+						Service *string `json:"service,omitempty"`
+					} `json:"stream,omitempty"`
+					Values *[][]string `json:"values,omitempty"`
+				} `json:"result,omitempty"`
+				ResultType *string `json:"resultType,omitempty"`
+				Stats      *struct {
+					Ingester *struct {
+						CompressedBytes    *float32 `json:"compressedBytes,omitempty"`
+						DecompressedBytes  *float32 `json:"decompressedBytes,omitempty"`
+						DecompressedLines  *float32 `json:"decompressedLines,omitempty"`
+						HeadChunkBytes     *float32 `json:"headChunkBytes,omitempty"`
+						HeadChunkLines     *float32 `json:"headChunkLines,omitempty"`
+						TotalBatches       *float32 `json:"totalBatches,omitempty"`
+						TotalChunksMatched *float32 `json:"totalChunksMatched,omitempty"`
+						TotalDuplicates    *float32 `json:"totalDuplicates,omitempty"`
+						TotalLinesSent     *float32 `json:"totalLinesSent,omitempty"`
+						TotalReached       *float32 `json:"totalReached,omitempty"`
+					} `json:"ingester,omitempty"`
+					Store *struct {
+						ChunksDownloadTime    *float32 `json:"chunksDownloadTime,omitempty"`
+						CompressedBytes       *float32 `json:"compressedBytes,omitempty"`
+						DecompressedBytes     *float32 `json:"decompressedBytes,omitempty"`
+						DecompressedLines     *float32 `json:"decompressedLines,omitempty"`
+						HeadChunkBytes        *float32 `json:"headChunkBytes,omitempty"`
+						HeadChunkLines        *float32 `json:"headChunkLines,omitempty"`
+						TotalChunksDownloaded *float32 `json:"totalChunksDownloaded,omitempty"`
+						TotalChunksRef        *float32 `json:"totalChunksRef,omitempty"`
+						TotalDuplicates       *float32 `json:"totalDuplicates,omitempty"`
+					} `json:"store,omitempty"`
+					Summary *struct {
+						BytesProcessedPerSecond *float32 `json:"bytesProcessedPerSecond,omitempty"`
+						ExecTime                *float32 `json:"execTime,omitempty"`
+						LinesProcessedPerSecond *float32 `json:"linesProcessedPerSecond,omitempty"`
+						TotalBytesProcessed     *float32 `json:"totalBytesProcessed,omitempty"`
+						TotalLinesProcessed     *float32 `json:"totalLinesProcessed,omitempty"`
+					} `json:"summary,omitempty"`
+				} `json:"stats,omitempty"`
+			} `json:"data,omitempty"`
+			Status *string `json:"status,omitempty"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCalculateImageChecksumResponse parses an HTTP response from a CalculateImageChecksumWithResponse call
+func ParseCalculateImageChecksumResponse(rsp *http.Response) (*CalculateImageChecksumResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CalculateImageChecksumResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Checksum *string                 `json:"checksum,omitempty"`
+			Errors   *[]interface{}          `json:"errors,omitempty"`
+			Help     *map[string]interface{} `json:"help,omitempty"`
+			Image    *string                 `json:"image,omitempty"`
+			Message  *string                 `json:"message,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest struct {
+			Errors  *[]interface{}          `json:"errors,omitempty"`
+			Help    *map[string]interface{} `json:"help,omitempty"`
+			Message *string                 `json:"message,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest struct {
+			Errors *[]struct {
+				Message *string `json:"message,omitempty"`
+			} `json:"errors,omitempty"`
+			Help    *map[string]interface{} `json:"help,omitempty"`
+			Message *string                 `json:"message,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	}
 
@@ -7946,6 +8496,38 @@ func ParseDeleteImageResponse(rsp *http.Response) (*DeleteImageResponse, error) 
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDownloadAnImageResponse parses an HTTP response from a DownloadAnImageWithResponse call
+func ParseDownloadAnImageResponse(rsp *http.Response) (*DownloadAnImageResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DownloadAnImageResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest struct {
+			Errors *[]struct {
+				Message *string `json:"message,omitempty"`
+			} `json:"errors,omitempty"`
+			Help    *map[string]interface{} `json:"help,omitempty"`
+			Message *string                 `json:"message,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	}
 
@@ -8644,6 +9226,65 @@ func ParseDedicateNodeResponse(rsp *http.Response) (*DedicateNodeResponse, error
 	return response, nil
 }
 
+// ParseListNodesResponse parses an HTTP response from a ListNodesWithResponse call
+func ParseListNodesResponse(rsp *http.Response) (*ListNodesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListNodesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Errors *[]interface{} `json:"errors,omitempty"`
+			Help   *struct {
+				CheckOrkaNodeStatus               *string `json:"check_orka_node_status,omitempty"`
+				CreateVirtualMachineConfiguration *string `json:"create_virtual_machine_configuration,omitempty"`
+				DeployVirtualMachine              *string `json:"deploy_virtual_machine,omitempty"`
+				RequiredRequestDataForCreate      *struct {
+					OrkaBaseImg *string `json:"orka_base_img,omitempty"`
+					OrkaImage   *string `json:"orka_image,omitempty"`
+					OrkaVmName  *string `json:"orka_vm_name,omitempty"`
+				} `json:"required_request_data_for_create,omitempty"`
+				RequiredRequestDataForDeploy *struct {
+					OrkaNodeName *string `json:"orka_node_name,omitempty"`
+					OrkaVmName   *string `json:"orka_vm_name,omitempty"`
+				} `json:"required_request_data_for_deploy,omitempty"`
+			} `json:"help,omitempty"`
+			Message *string `json:"message,omitempty"`
+			Nodes   *[]struct {
+				Address         *string        `json:"address,omitempty"`
+				AllocatableCpu  *float32       `json:"allocatable_cpu,omitempty"`
+				AllocatableGpu  *string        `json:"allocatable_gpu,omitempty"`
+				AvailableCpu    *float32       `json:"available_cpu,omitempty"`
+				AvailableGpu    *string        `json:"available_gpu,omitempty"`
+				AvailableMemory *string        `json:"available_memory,omitempty"`
+				HostIP          *string        `json:"hostIP,omitempty"`
+				HostName        *string        `json:"host_name,omitempty"`
+				Name            *string        `json:"name,omitempty"`
+				NodeType        *string        `json:"node_type,omitempty"`
+				OrkaTags        *[]interface{} `json:"orka_tags,omitempty"`
+				State           *string        `json:"state,omitempty"`
+				TotalCpu        *float32       `json:"total_cpu,omitempty"`
+				TotalMemory     *string        `json:"total_memory,omitempty"`
+			} `json:"nodes,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseListAllNodesAdminResponse parses an HTTP response from a ListAllNodesAdminWithResponse call
 func ParseListAllNodesAdminResponse(rsp *http.Response) (*ListAllNodesAdminResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -8741,8 +9382,10 @@ func ParseCheckNodeStatusResponse(rsp *http.Response) (*CheckNodeStatusResponse,
 			Message    *string                 `json:"message,omitempty"`
 			NodeStatus *struct {
 				Cpu      *float32 `json:"cpu,omitempty"`
+				Gpu      *float32 `json:"gpu,omitempty"`
 				Memory   *string  `json:"memory,omitempty"`
 				NodeName *string  `json:"nodeName,omitempty"`
+				NodeType *string  `json:"nodeType,omitempty"`
 				Sandbox  *string  `json:"sandbox,omitempty"`
 				Status   *string  `json:"status,omitempty"`
 			} `json:"node_status,omitempty"`
@@ -8752,6 +9395,38 @@ func ParseCheckNodeStatusResponse(rsp *http.Response) (*CheckNodeStatusResponse,
 		}
 		response.JSON200 = &dest
 
+	}
+
+	return response, nil
+}
+
+// ParseUntagNodeResponse parses an HTTP response from a UntagNodeWithResponse call
+func ParseUntagNodeResponse(rsp *http.Response) (*UntagNodeResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UntagNodeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseTagNodeResponse parses an HTTP response from a TagNodeWithResponse call
+func ParseTagNodeResponse(rsp *http.Response) (*TagNodeResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TagNodeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
 	}
 
 	return response, nil
@@ -8873,17 +9548,22 @@ func ParseListYourVmConfigurationsResponse(rsp *http.Response) (*ListYourVmConfi
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
 			Configs *[]struct {
-				AttachedDisk   *string  `json:"attached_disk,omitempty"`
-				GpuPassthrough *bool    `json:"gpu_passthrough,omitempty"`
-				IoBoost        *bool    `json:"io_boost,omitempty"`
-				IsoImage       *string  `json:"iso_image,omitempty"`
-				OrkaBaseImage  *string  `json:"orka_base_image,omitempty"`
-				OrkaCpuCore    *float32 `json:"orka_cpu_core,omitempty"`
-				OrkaVmName     *string  `json:"orka_vm_name,omitempty"`
-				Owner          *string  `json:"owner,omitempty"`
-				UseSavedState  *bool    `json:"use_saved_state,omitempty"`
-				VcpuCount      *float32 `json:"vcpu_count,omitempty"`
-				VncConsole     *bool    `json:"vnc_console,omitempty"`
+				AttachedDisk   *string      `json:"attached_disk,omitempty"`
+				GpuPassthrough *bool        `json:"gpu_passthrough,omitempty"`
+				IoBoost        *bool        `json:"io_boost,omitempty"`
+				IsoImage       *string      `json:"iso_image,omitempty"`
+				Memory         *interface{} `json:"memory,omitempty"`
+				OrkaBaseImage  *string      `json:"orka_base_image,omitempty"`
+				OrkaCpuCore    *float32     `json:"orka_cpu_core,omitempty"`
+				OrkaVmName     *string      `json:"orka_vm_name,omitempty"`
+				Owner          *string      `json:"owner,omitempty"`
+				Scheduler      *string      `json:"scheduler,omitempty"`
+				SystemSerial   *string      `json:"system_serial,omitempty"`
+				Tag            *string      `json:"tag,omitempty"`
+				TagRequired    *bool        `json:"tag_required,omitempty"`
+				UseSavedState  *bool        `json:"use_saved_state,omitempty"`
+				VcpuCount      *float32     `json:"vcpu_count,omitempty"`
+				VncConsole     *bool        `json:"vnc_console,omitempty"`
 			} `json:"configs,omitempty"`
 			Errors  *[]interface{}          `json:"errors,omitempty"`
 			Help    *map[string]interface{} `json:"help,omitempty"`
@@ -8952,10 +9632,15 @@ func ParseGetVmConfigurationByNameResponse(rsp *http.Response) (*GetVmConfigurat
 				GpuPassthrough *bool    `json:"gpu_passthrough,omitempty"`
 				IoBoost        *bool    `json:"io_boost,omitempty"`
 				IsoImage       *string  `json:"iso_image,omitempty"`
+				Memory         *string  `json:"memory,omitempty"`
 				OrkaBaseImage  *string  `json:"orka_base_image,omitempty"`
 				OrkaCpuCore    *float32 `json:"orka_cpu_core,omitempty"`
 				OrkaVmName     *string  `json:"orka_vm_name,omitempty"`
 				Owner          *string  `json:"owner,omitempty"`
+				Scheduler      *string  `json:"scheduler,omitempty"`
+				SystemSerial   *string  `json:"system_serial,omitempty"`
+				Tag            *string  `json:"tag,omitempty"`
+				TagRequired    *bool    `json:"tag_required,omitempty"`
 				UseSavedState  *bool    `json:"use_saved_state,omitempty"`
 				VncConsole     *bool    `json:"vnc_console,omitempty"`
 			} `json:"configs,omitempty"`
@@ -9093,8 +9778,9 @@ func ParseDeployVmConfigurationResponse(rsp *http.Response) (*DeployVmConfigurat
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Errors *[]interface{} `json:"errors,omitempty"`
-			Help   *struct {
+			Errors         *[]interface{} `json:"errors,omitempty"`
+			GpuPassthrough *bool          `json:"gpu_passthrough,omitempty"`
+			Help           *struct {
 				DataForVirtualMachineExecTasks *struct {
 					OrkaVmName *string `json:"orka_vm_name,omitempty"`
 				} `json:"data_for_virtual_machine_exec_tasks,omitempty"`
@@ -9105,12 +9791,14 @@ func ParseDeployVmConfigurationResponse(rsp *http.Response) (*DeployVmConfigurat
 				VirtualMachineVnc     *string `json:"virtual_machine_vnc,omitempty"`
 			} `json:"help,omitempty"`
 			HostCpu         *string        `json:"host_cpu,omitempty"`
+			IoBoost         *bool          `json:"io_boost,omitempty"`
 			Ip              *string        `json:"ip,omitempty"`
 			Message         *string        `json:"message,omitempty"`
 			PortWarnings    *[]interface{} `json:"port_warnings,omitempty"`
 			Ram             *string        `json:"ram,omitempty"`
 			ScreenSharePort *string        `json:"screen_share_port,omitempty"`
 			SshPort         *string        `json:"ssh_port,omitempty"`
+			UseSavedState   *bool          `json:"use_saved_state,omitempty"`
 			Vcpu            *string        `json:"vcpu,omitempty"`
 			VmId            *string        `json:"vm_id,omitempty"`
 			VncPort         *string        `json:"vnc_port,omitempty"`
@@ -9364,11 +10052,13 @@ func ParseListYourVMsResponse(rsp *http.Response) (*ListYourVMsResponse, error) 
 					ConfigurationTemplate *string  `json:"configuration_template,omitempty"`
 					Cpu                   *float32 `json:"cpu,omitempty"`
 					CreationTimestamp     *string  `json:"creationTimestamp,omitempty"`
+					Gpu                   *string  `json:"gpu,omitempty"`
 					Image                 *string  `json:"image,omitempty"`
 					IoBoost               *bool    `json:"io_boost,omitempty"`
 					NodeLocation          *string  `json:"node_location,omitempty"`
 					NodeStatus            *string  `json:"node_status,omitempty"`
 					Owner                 *string  `json:"owner,omitempty"`
+					Replicas              *float32 `json:"replicas,omitempty"`
 					ReservedPorts         *[]struct {
 						GuestPort *float32 `json:"guest_port,omitempty"`
 						HostPort  *float32 `json:"host_port,omitempty"`
@@ -9376,6 +10066,8 @@ func ParseListYourVMsResponse(rsp *http.Response) (*ListYourVMsResponse, error) 
 					} `json:"reserved_ports,omitempty"`
 					ScreenSharingPort  *string  `json:"screen_sharing_port,omitempty"`
 					SshPort            *string  `json:"ssh_port,omitempty"`
+					Tag                *string  `json:"tag,omitempty"`
+					TagRequired        *bool    `json:"tag_required,omitempty"`
 					UseSavedState      *bool    `json:"use_saved_state,omitempty"`
 					Vcpu               *float32 `json:"vcpu,omitempty"`
 					VirtualMachineId   *string  `json:"virtual_machine_id,omitempty"`
@@ -9384,6 +10076,8 @@ func ParseListYourVMsResponse(rsp *http.Response) (*ListYourVMsResponse, error) 
 					VmStatus           *string  `json:"vm_status,omitempty"`
 					VncPort            *string  `json:"vnc_port,omitempty"`
 				} `json:"status,omitempty"`
+				Tag                *string  `json:"tag,omitempty"`
+				TagRequired        *bool    `json:"tag_required,omitempty"`
 				UseSavedState      *bool    `json:"use_saved_state,omitempty"`
 				Vcpu               *float32 `json:"vcpu,omitempty"`
 				VirtualMachineName *string  `json:"virtual_machine_name,omitempty"`
@@ -9469,11 +10163,13 @@ func ParseListAllVMsAdminResponse(rsp *http.Response) (*ListAllVMsAdminResponse,
 					ConfigurationTemplate *string  `json:"configuration_template,omitempty"`
 					Cpu                   *float32 `json:"cpu,omitempty"`
 					CreationTimestamp     *string  `json:"creationTimestamp,omitempty"`
+					Gpu                   *string  `json:"gpu,omitempty"`
 					Image                 *string  `json:"image,omitempty"`
 					IoBoost               *bool    `json:"io_boost,omitempty"`
 					NodeLocation          *string  `json:"node_location,omitempty"`
 					NodeStatus            *string  `json:"node_status,omitempty"`
 					Owner                 *string  `json:"owner,omitempty"`
+					Replicas              *float32 `json:"replicas,omitempty"`
 					ReservedPorts         *[]struct {
 						GuestPort *float32 `json:"guest_port,omitempty"`
 						HostPort  *float32 `json:"host_port,omitempty"`
@@ -9481,6 +10177,8 @@ func ParseListAllVMsAdminResponse(rsp *http.Response) (*ListAllVMsAdminResponse,
 					} `json:"reserved_ports,omitempty"`
 					ScreenSharingPort  *string  `json:"screen_sharing_port,omitempty"`
 					SshPort            *string  `json:"ssh_port,omitempty"`
+					Tag                *string  `json:"tag,omitempty"`
+					TagRequired        *bool    `json:"tag_required,omitempty"`
 					UseSavedState      *bool    `json:"use_saved_state,omitempty"`
 					Vcpu               *float32 `json:"vcpu,omitempty"`
 					VirtualMachineId   *string  `json:"virtual_machine_id,omitempty"`
@@ -9489,6 +10187,8 @@ func ParseListAllVMsAdminResponse(rsp *http.Response) (*ListAllVMsAdminResponse,
 					VmStatus           *string  `json:"vm_status,omitempty"`
 					VncPort            *string  `json:"vnc_port,omitempty"`
 				} `json:"status,omitempty"`
+				Tag                *string  `json:"tag,omitempty"`
+				TagRequired        *bool    `json:"tag_required,omitempty"`
 				UseSavedState      *bool    `json:"use_saved_state,omitempty"`
 				Vcpu               *float32 `json:"vcpu,omitempty"`
 				VirtualMachineName *string  `json:"virtual_machine_name,omitempty"`
@@ -9538,11 +10238,13 @@ func ParseListUserSVMsAdminResponse(rsp *http.Response) (*ListUserSVMsAdminRespo
 					ConfigurationTemplate *string  `json:"configuration_template,omitempty"`
 					Cpu                   *float32 `json:"cpu,omitempty"`
 					CreationTimestamp     *string  `json:"creationTimestamp,omitempty"`
+					Gpu                   *string  `json:"gpu,omitempty"`
 					Image                 *string  `json:"image,omitempty"`
 					IoBoost               *bool    `json:"io_boost,omitempty"`
 					NodeLocation          *string  `json:"node_location,omitempty"`
 					NodeStatus            *string  `json:"node_status,omitempty"`
 					Owner                 *string  `json:"owner,omitempty"`
+					Replicas              *float32 `json:"replicas,omitempty"`
 					ReservedPorts         *[]struct {
 						GuestPort *float32 `json:"guest_port,omitempty"`
 						HostPort  *float32 `json:"host_port,omitempty"`
@@ -9550,6 +10252,8 @@ func ParseListUserSVMsAdminResponse(rsp *http.Response) (*ListUserSVMsAdminRespo
 					} `json:"reserved_ports,omitempty"`
 					ScreenSharingPort  *string  `json:"screen_sharing_port,omitempty"`
 					SshPort            *string  `json:"ssh_port,omitempty"`
+					Tag                *string  `json:"tag,omitempty"`
+					TagRequired        *bool    `json:"tag_required,omitempty"`
 					UseSavedState      *bool    `json:"use_saved_state,omitempty"`
 					Vcpu               *float32 `json:"vcpu,omitempty"`
 					VirtualMachineId   *string  `json:"virtual_machine_id,omitempty"`
@@ -9558,6 +10262,8 @@ func ParseListUserSVMsAdminResponse(rsp *http.Response) (*ListUserSVMsAdminRespo
 					VmStatus           *string  `json:"vm_status,omitempty"`
 					VncPort            *string  `json:"vnc_port,omitempty"`
 				} `json:"status,omitempty"`
+				Tag                *string  `json:"tag,omitempty"`
+				TagRequired        *bool    `json:"tag_required,omitempty"`
 				UseSavedState      *bool    `json:"use_saved_state,omitempty"`
 				Vcpu               *float32 `json:"vcpu,omitempty"`
 				VirtualMachineName *string  `json:"virtual_machine_name,omitempty"`
@@ -9699,9 +10405,11 @@ func ParseCheckUserSVmStatusAdminResponse(rsp *http.Response) (*CheckUserSVmStat
 			Help                    *map[string]interface{} `json:"help,omitempty"`
 			Message                 *string                 `json:"message,omitempty"`
 			VirtualMachineResources *[]struct {
+				RAM                   *string  `json:"RAM,omitempty"`
 				BaseImage             *string  `json:"base_image,omitempty"`
 				ConfigurationTemplate *string  `json:"configuration_template,omitempty"`
 				Cpu                   *float32 `json:"cpu,omitempty"`
+				GpuPassthrough        *bool    `json:"gpu_passthrough,omitempty"`
 				Image                 *string  `json:"image,omitempty"`
 				IoBoost               *bool    `json:"io_boost,omitempty"`
 				Owner                 *string  `json:"owner,omitempty"`

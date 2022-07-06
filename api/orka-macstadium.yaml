@@ -81,7 +81,7 @@ paths:
   /logs:
     delete:
       tags:
-        - Logs
+        - Logs 1.0 (deprecated)
       summary: Delete logs
       description: "Delete all logs for your Orka environment.\n\nThis operation requires both token and license authentication. You need to pass both the `orka-licensekey: <license>` and `Authorization: Bearer <token>` headers."
       operationId: deleteLogs
@@ -112,10 +112,10 @@ paths:
   /logs/query:
     post:
       tags:
-        - Logs
+        - Logs 2.0
       summary: List logs
       description: "Retrieve a log of all CLI commands and API requests executed against your Orka environment. \n\nThis is an administrative operation. You need to pass the `orka-licensekey: <license>` header.\n\nYou can optionally limit the amount of results returned with the `limit` query parameter."
-      operationId: listLogs
+      operationId: listLogs1
       parameters:
         - name: limit
           in: query
@@ -125,7 +125,233 @@ paths:
           description: Limit the total number of logs returned
       responses:
         "200":
-          description: List 10 most recent logs
+          description: Filter logs by string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      result:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            stream:
+                              type: object
+                              properties:
+                                log_type:
+                                  type: string
+                                  example: user_logs
+                                service:
+                                  type: string
+                                  example: orka-logs
+                            values:
+                              type: array
+                              items:
+                                type: array
+                                items:
+                                  type: string
+                                  example: "1655896120552266000"
+                                example:
+                                  - "1655896120552266000"
+                                  - "{\"message\":{\"request\":{\"url\":\"/resources/vm/deploy\",\"method\":\"POST\",\"headers\":{\"accept\":\"application/json, text/plain, */*\",\"content-type\":\"application/json\",\"user-agent\":\"orka-cli\",\"x-cli-version\":\"2.1.0\",\"platform\":\"darwin\",\"release\":\"21.1.0\",\"content-length\":\"114\",\"host\":\"{{host}}\",\"connection\":\"close\"},\"body\":{\"orka_vm_name\":\"demo-logs\",\"replicas\":1,\"vnc_console\":true,\"tag\":\"\",\"tag_required\":false,\"gpu_passthrough\":false}},\"response\":{\"statusCode\":200,\"headers\":{\"access-control-allow-origin\":\"*\",\"content-type\":\"application/json; charset=utf-8\",\"content-length\":\"921\",\"etag\":\"W/\\\"399-8ZKOtDk1phgqtHqhYO8LdCBfHr0\\\"\"},\"body\":{\"message\":\"Successfully deployed VM\",\"help\":{\"start_virtual_machine\":\"To start a VM send rest request to http://{{domain}}/resources/vm/exec/start\",\"stop_virtual_machine\":\"To stop a VM send rest request to http://{{domain}}/resources/vm/exec/stop\",\"resume_virtual_machine\":\"To resume a VM send rest request to http://{{domain}}/resources/vm/exec/resume\",\"suspend_virtual_machine\":\"To suspend a VM send rest request to http://{{domain}}/resources/vm/exec/suspend\",\"data_for_virtual_machine_exec_tasks\":{\"orka_vm_name\":\"demo-logs\",\"orka_node_name\":\"mini-1\"},\"virtual_machine_vnc\":\"Once started and deployed, you can use VNC to access it via {{vmIP}}:5999\"},\"errors\":[],\"ram\":\"16.00G\",\"vcpu\":\"3\",\"host_cpu\":\"3\",\"ip\":\"{{vmIP}}\",\"ssh_port\":\"8822\",\"screen_share_port\":\"5900\",\"vm_id\":\"84ac9cf673e7a\",\"port_warnings\":[],\"io_boost\":true,\"use_saved_state\":false,\"gpu_passthrough\":false,\"vnc_port\":\"5999\"}},\"user\":{\"email\":\"{{email}}\",\"id\":\"dc440e6e-eacd-4a84-8800-cd153b4a5b58\"},\"createdAt\":\"2022-06-22T11:08:40.548Z\",\"level\":\"info\",\"logVersion\":\"2.0\"}}"
+                              example:
+                                - - "1655896120552266000"
+                                  - "{\"message\":{\"request\":{\"url\":\"/resources/vm/deploy\",\"method\":\"POST\",\"headers\":{\"accept\":\"application/json, text/plain, */*\",\"content-type\":\"application/json\",\"user-agent\":\"orka-cli\",\"x-cli-version\":\"2.1.0\",\"platform\":\"darwin\",\"release\":\"21.1.0\",\"content-length\":\"114\",\"host\":\"{{host}}\",\"connection\":\"close\"},\"body\":{\"orka_vm_name\":\"demo-logs\",\"replicas\":1,\"vnc_console\":true,\"tag\":\"\",\"tag_required\":false,\"gpu_passthrough\":false}},\"response\":{\"statusCode\":200,\"headers\":{\"access-control-allow-origin\":\"*\",\"content-type\":\"application/json; charset=utf-8\",\"content-length\":\"921\",\"etag\":\"W/\\\"399-8ZKOtDk1phgqtHqhYO8LdCBfHr0\\\"\"},\"body\":{\"message\":\"Successfully deployed VM\",\"help\":{\"start_virtual_machine\":\"To start a VM send rest request to http://{{domain}}/resources/vm/exec/start\",\"stop_virtual_machine\":\"To stop a VM send rest request to http://{{domain}}/resources/vm/exec/stop\",\"resume_virtual_machine\":\"To resume a VM send rest request to http://{{domain}}/resources/vm/exec/resume\",\"suspend_virtual_machine\":\"To suspend a VM send rest request to http://{{domain}}/resources/vm/exec/suspend\",\"data_for_virtual_machine_exec_tasks\":{\"orka_vm_name\":\"demo-logs\",\"orka_node_name\":\"mini-1\"},\"virtual_machine_vnc\":\"Once started and deployed, you can use VNC to access it via {{vmIP}}:5999\"},\"errors\":[],\"ram\":\"16.00G\",\"vcpu\":\"3\",\"host_cpu\":\"3\",\"ip\":\"{{vmIP}}\",\"ssh_port\":\"8822\",\"screen_share_port\":\"5900\",\"vm_id\":\"84ac9cf673e7a\",\"port_warnings\":[],\"io_boost\":true,\"use_saved_state\":false,\"gpu_passthrough\":false,\"vnc_port\":\"5999\"}},\"user\":{\"email\":\"{{email}}\",\"id\":\"dc440e6e-eacd-4a84-8800-cd153b4a5b58\"},\"createdAt\":\"2022-06-22T11:08:40.548Z\",\"level\":\"info\",\"logVersion\":\"2.0\"}}"
+                                - - "1655896116401379000"
+                                  - "{\"message\":{\"request\":{\"url\":\"/resources/vm/configs/demo-logs\",\"method\":\"GET\",\"headers\":{\"accept\":\"application/json, text/plain, */*\",\"user-agent\":\"orka-cli\",\"x-cli-version\":\"2.1.0\",\"platform\":\"darwin\",\"release\":\"21.1.0\",\"host\":\"{{host}}\",\"connection\":\"close\"},\"body\":{}},\"response\":{\"statusCode\":200,\"headers\":{\"access-control-allow-origin\":\"*\",\"content-type\":\"application/json; charset=utf-8\",\"content-length\":\"390\",\"etag\":\"W/\\\"186-8FBclVxmCIQtI+usSZ6+oaV8X+8\\\"\"},\"body\":{\"message\":\"\",\"help\":{},\"errors\":[],\"configs\":[{\"owner\":\"{{email}}\",\"orka_vm_name\":\"demo-logs\",\"orka_base_image\":\"90GBigSurSSH.img\",\"orka_cpu_core\":3,\"vcpu_count\":3,\"iso_image\":\"None\",\"attached_disk\":\"None\",\"vnc_console\":true,\"io_boost\":true,\"use_saved_state\":false,\"gpu_passthrough\":false,\"system_serial\":\"N/A\",\"tag\":\"\",\"tag_required\":false,\"scheduler\":\"default\",\"memory\":\"automatic\"}]}},\"user\":{\"email\":\"{{email}}\",\"id\":\"dc440e6e-eacd-4a84-8800-cd153b4a5b58\"},\"createdAt\":\"2022-06-22T11:08:36.399Z\",\"level\":\"info\",\"logVersion\":\"2.0\"}}"
+                                - - "1655896116401334000"
+                                  - "{\"message\":{\"request\":{\"url\":\"/resources/vm/configs/demo-logs\",\"method\":\"GET\",\"headers\":{\"accept\":\"application/json, text/plain, */*\",\"user-agent\":\"orka-cli\",\"x-cli-version\":\"2.1.0\",\"platform\":\"darwin\",\"release\":\"21.1.0\",\"host\":\"{{host}}\",\"connection\":\"close\"},\"body\":{}},\"response\":{\"statusCode\":200,\"headers\":{\"access-control-allow-origin\":\"*\",\"content-type\":\"application/json; charset=utf-8\",\"content-length\":\"390\",\"etag\":\"W/\\\"186-8FBclVxmCIQtI+usSZ6+oaV8X+8\\\"\"},\"body\":{\"message\":\"\",\"help\":{},\"errors\":[],\"configs\":[{\"owner\":\"{{email}}\",\"orka_vm_name\":\"demo-logs\",\"orka_base_image\":\"90GBigSurSSH.img\",\"orka_cpu_core\":3,\"vcpu_count\":3,\"iso_image\":\"None\",\"attached_disk\":\"None\",\"vnc_console\":true,\"io_boost\":true,\"use_saved_state\":false,\"gpu_passthrough\":false,\"system_serial\":\"N/A\",\"tag\":\"\",\"tag_required\":false,\"scheduler\":\"default\",\"memory\":\"automatic\"}]}},\"user\":{\"email\":\"{{email}}\",\"id\":\"dc440e6e-eacd-4a84-8800-cd153b4a5b58\"},\"createdAt\":\"2022-06-22T11:08:36.399Z\",\"level\":\"info\",\"logVersion\":\"2.0\"}}"
+                        example:
+                          - stream:
+                              log_type: user_logs
+                              service: orka-logs
+                            values:
+                              - - "1655896120552266000"
+                                - "{\"message\":{\"request\":{\"url\":\"/resources/vm/deploy\",\"method\":\"POST\",\"headers\":{\"accept\":\"application/json, text/plain, */*\",\"content-type\":\"application/json\",\"user-agent\":\"orka-cli\",\"x-cli-version\":\"2.1.0\",\"platform\":\"darwin\",\"release\":\"21.1.0\",\"content-length\":\"114\",\"host\":\"{{host}}\",\"connection\":\"close\"},\"body\":{\"orka_vm_name\":\"demo-logs\",\"replicas\":1,\"vnc_console\":true,\"tag\":\"\",\"tag_required\":false,\"gpu_passthrough\":false}},\"response\":{\"statusCode\":200,\"headers\":{\"access-control-allow-origin\":\"*\",\"content-type\":\"application/json; charset=utf-8\",\"content-length\":\"921\",\"etag\":\"W/\\\"399-8ZKOtDk1phgqtHqhYO8LdCBfHr0\\\"\"},\"body\":{\"message\":\"Successfully deployed VM\",\"help\":{\"start_virtual_machine\":\"To start a VM send rest request to http://{{domain}}/resources/vm/exec/start\",\"stop_virtual_machine\":\"To stop a VM send rest request to http://{{domain}}/resources/vm/exec/stop\",\"resume_virtual_machine\":\"To resume a VM send rest request to http://{{domain}}/resources/vm/exec/resume\",\"suspend_virtual_machine\":\"To suspend a VM send rest request to http://{{domain}}/resources/vm/exec/suspend\",\"data_for_virtual_machine_exec_tasks\":{\"orka_vm_name\":\"demo-logs\",\"orka_node_name\":\"mini-1\"},\"virtual_machine_vnc\":\"Once started and deployed, you can use VNC to access it via {{vmIP}}:5999\"},\"errors\":[],\"ram\":\"16.00G\",\"vcpu\":\"3\",\"host_cpu\":\"3\",\"ip\":\"{{vmIP}}\",\"ssh_port\":\"8822\",\"screen_share_port\":\"5900\",\"vm_id\":\"84ac9cf673e7a\",\"port_warnings\":[],\"io_boost\":true,\"use_saved_state\":false,\"gpu_passthrough\":false,\"vnc_port\":\"5999\"}},\"user\":{\"email\":\"{{email}}\",\"id\":\"dc440e6e-eacd-4a84-8800-cd153b4a5b58\"},\"createdAt\":\"2022-06-22T11:08:40.548Z\",\"level\":\"info\",\"logVersion\":\"2.0\"}}"
+                              - - "1655896116401379000"
+                                - "{\"message\":{\"request\":{\"url\":\"/resources/vm/configs/demo-logs\",\"method\":\"GET\",\"headers\":{\"accept\":\"application/json, text/plain, */*\",\"user-agent\":\"orka-cli\",\"x-cli-version\":\"2.1.0\",\"platform\":\"darwin\",\"release\":\"21.1.0\",\"host\":\"{{host}}\",\"connection\":\"close\"},\"body\":{}},\"response\":{\"statusCode\":200,\"headers\":{\"access-control-allow-origin\":\"*\",\"content-type\":\"application/json; charset=utf-8\",\"content-length\":\"390\",\"etag\":\"W/\\\"186-8FBclVxmCIQtI+usSZ6+oaV8X+8\\\"\"},\"body\":{\"message\":\"\",\"help\":{},\"errors\":[],\"configs\":[{\"owner\":\"{{email}}\",\"orka_vm_name\":\"demo-logs\",\"orka_base_image\":\"90GBigSurSSH.img\",\"orka_cpu_core\":3,\"vcpu_count\":3,\"iso_image\":\"None\",\"attached_disk\":\"None\",\"vnc_console\":true,\"io_boost\":true,\"use_saved_state\":false,\"gpu_passthrough\":false,\"system_serial\":\"N/A\",\"tag\":\"\",\"tag_required\":false,\"scheduler\":\"default\",\"memory\":\"automatic\"}]}},\"user\":{\"email\":\"{{email}}\",\"id\":\"dc440e6e-eacd-4a84-8800-cd153b4a5b58\"},\"createdAt\":\"2022-06-22T11:08:36.399Z\",\"level\":\"info\",\"logVersion\":\"2.0\"}}"
+                              - - "1655896116401334000"
+                                - "{\"message\":{\"request\":{\"url\":\"/resources/vm/configs/demo-logs\",\"method\":\"GET\",\"headers\":{\"accept\":\"application/json, text/plain, */*\",\"user-agent\":\"orka-cli\",\"x-cli-version\":\"2.1.0\",\"platform\":\"darwin\",\"release\":\"21.1.0\",\"host\":\"{{host}}\",\"connection\":\"close\"},\"body\":{}},\"response\":{\"statusCode\":200,\"headers\":{\"access-control-allow-origin\":\"*\",\"content-type\":\"application/json; charset=utf-8\",\"content-length\":\"390\",\"etag\":\"W/\\\"186-8FBclVxmCIQtI+usSZ6+oaV8X+8\\\"\"},\"body\":{\"message\":\"\",\"help\":{},\"errors\":[],\"configs\":[{\"owner\":\"{{email}}\",\"orka_vm_name\":\"demo-logs\",\"orka_base_image\":\"90GBigSurSSH.img\",\"orka_cpu_core\":3,\"vcpu_count\":3,\"iso_image\":\"None\",\"attached_disk\":\"None\",\"vnc_console\":true,\"io_boost\":true,\"use_saved_state\":false,\"gpu_passthrough\":false,\"system_serial\":\"N/A\",\"tag\":\"\",\"tag_required\":false,\"scheduler\":\"default\",\"memory\":\"automatic\"}]}},\"user\":{\"email\":\"{{email}}\",\"id\":\"dc440e6e-eacd-4a84-8800-cd153b4a5b58\"},\"createdAt\":\"2022-06-22T11:08:36.399Z\",\"level\":\"info\",\"logVersion\":\"2.0\"}}"
+                      resultType:
+                        type: string
+                        example: streams
+                      stats:
+                        type: object
+                        properties:
+                          ingester:
+                            type: object
+                            properties:
+                              compressedBytes:
+                                type: number
+                                example: 48978
+                              decompressedBytes:
+                                type: number
+                                example: 661249
+                              decompressedLines:
+                                type: number
+                                example: 487
+                              headChunkBytes:
+                                type: number
+                                example: 14691
+                              headChunkLines:
+                                type: number
+                                example: 15
+                              totalBatches:
+                                type: number
+                                example: 1
+                              totalChunksMatched:
+                                type: number
+                                example: 1
+                              totalDuplicates:
+                                type: number
+                                example: 0
+                              totalLinesSent:
+                                type: number
+                                example: 3
+                              totalReached:
+                                type: number
+                                example: 16
+                          store:
+                            type: object
+                            properties:
+                              chunksDownloadTime:
+                                type: number
+                                example: 0
+                              compressedBytes:
+                                type: number
+                                example: 0
+                              decompressedBytes:
+                                type: number
+                                example: 0
+                              decompressedLines:
+                                type: number
+                                example: 0
+                              headChunkBytes:
+                                type: number
+                                example: 0
+                              headChunkLines:
+                                type: number
+                                example: 0
+                              totalChunksDownloaded:
+                                type: number
+                                example: 0
+                              totalChunksRef:
+                                type: number
+                                example: 0
+                              totalDuplicates:
+                                type: number
+                                example: 0
+                          summary:
+                            type: object
+                            properties:
+                              bytesProcessedPerSecond:
+                                type: number
+                                example: 8358710
+                              execTime:
+                                type: number
+                                example: 0.080866544
+                              linesProcessedPerSecond:
+                                type: number
+                                example: 6207
+                              totalBytesProcessed:
+                                type: number
+                                example: 675940
+                              totalLinesProcessed:
+                                type: number
+                                example: 502
+                  status:
+                    type: string
+                    example: success
+              examples:
+                Filter logs by string:
+                  value:
+                    data:
+                      result:
+                        - stream:
+                            log_type: user_logs
+                            service: orka-logs
+                          values:
+                            - - "1655896120552266000"
+                              - "{\"message\":{\"request\":{\"url\":\"/resources/vm/deploy\",\"method\":\"POST\",\"headers\":{\"accept\":\"application/json, text/plain, */*\",\"content-type\":\"application/json\",\"user-agent\":\"orka-cli\",\"x-cli-version\":\"2.1.0\",\"platform\":\"darwin\",\"release\":\"21.1.0\",\"content-length\":\"114\",\"host\":\"{{host}}\",\"connection\":\"close\"},\"body\":{\"orka_vm_name\":\"demo-logs\",\"replicas\":1,\"vnc_console\":true,\"tag\":\"\",\"tag_required\":false,\"gpu_passthrough\":false}},\"response\":{\"statusCode\":200,\"headers\":{\"access-control-allow-origin\":\"*\",\"content-type\":\"application/json; charset=utf-8\",\"content-length\":\"921\",\"etag\":\"W/\\\"399-8ZKOtDk1phgqtHqhYO8LdCBfHr0\\\"\"},\"body\":{\"message\":\"Successfully deployed VM\",\"help\":{\"start_virtual_machine\":\"To start a VM send rest request to http://{{domain}}/resources/vm/exec/start\",\"stop_virtual_machine\":\"To stop a VM send rest request to http://{{domain}}/resources/vm/exec/stop\",\"resume_virtual_machine\":\"To resume a VM send rest request to http://{{domain}}/resources/vm/exec/resume\",\"suspend_virtual_machine\":\"To suspend a VM send rest request to http://{{domain}}/resources/vm/exec/suspend\",\"data_for_virtual_machine_exec_tasks\":{\"orka_vm_name\":\"demo-logs\",\"orka_node_name\":\"mini-1\"},\"virtual_machine_vnc\":\"Once started and deployed, you can use VNC to access it via {{vmIP}}:5999\"},\"errors\":[],\"ram\":\"16.00G\",\"vcpu\":\"3\",\"host_cpu\":\"3\",\"ip\":\"{{vmIP}}\",\"ssh_port\":\"8822\",\"screen_share_port\":\"5900\",\"vm_id\":\"84ac9cf673e7a\",\"port_warnings\":[],\"io_boost\":true,\"use_saved_state\":false,\"gpu_passthrough\":false,\"vnc_port\":\"5999\"}},\"user\":{\"email\":\"{{email}}\",\"id\":\"dc440e6e-eacd-4a84-8800-cd153b4a5b58\"},\"createdAt\":\"2022-06-22T11:08:40.548Z\",\"level\":\"info\",\"logVersion\":\"2.0\"}}"
+                            - - "1655896116401379000"
+                              - "{\"message\":{\"request\":{\"url\":\"/resources/vm/configs/demo-logs\",\"method\":\"GET\",\"headers\":{\"accept\":\"application/json, text/plain, */*\",\"user-agent\":\"orka-cli\",\"x-cli-version\":\"2.1.0\",\"platform\":\"darwin\",\"release\":\"21.1.0\",\"host\":\"{{host}}\",\"connection\":\"close\"},\"body\":{}},\"response\":{\"statusCode\":200,\"headers\":{\"access-control-allow-origin\":\"*\",\"content-type\":\"application/json; charset=utf-8\",\"content-length\":\"390\",\"etag\":\"W/\\\"186-8FBclVxmCIQtI+usSZ6+oaV8X+8\\\"\"},\"body\":{\"message\":\"\",\"help\":{},\"errors\":[],\"configs\":[{\"owner\":\"{{email}}\",\"orka_vm_name\":\"demo-logs\",\"orka_base_image\":\"90GBigSurSSH.img\",\"orka_cpu_core\":3,\"vcpu_count\":3,\"iso_image\":\"None\",\"attached_disk\":\"None\",\"vnc_console\":true,\"io_boost\":true,\"use_saved_state\":false,\"gpu_passthrough\":false,\"system_serial\":\"N/A\",\"tag\":\"\",\"tag_required\":false,\"scheduler\":\"default\",\"memory\":\"automatic\"}]}},\"user\":{\"email\":\"{{email}}\",\"id\":\"dc440e6e-eacd-4a84-8800-cd153b4a5b58\"},\"createdAt\":\"2022-06-22T11:08:36.399Z\",\"level\":\"info\",\"logVersion\":\"2.0\"}}"
+                            - - "1655896116401334000"
+                              - "{\"message\":{\"request\":{\"url\":\"/resources/vm/configs/demo-logs\",\"method\":\"GET\",\"headers\":{\"accept\":\"application/json, text/plain, */*\",\"user-agent\":\"orka-cli\",\"x-cli-version\":\"2.1.0\",\"platform\":\"darwin\",\"release\":\"21.1.0\",\"host\":\"{{host}}\",\"connection\":\"close\"},\"body\":{}},\"response\":{\"statusCode\":200,\"headers\":{\"access-control-allow-origin\":\"*\",\"content-type\":\"application/json; charset=utf-8\",\"content-length\":\"390\",\"etag\":\"W/\\\"186-8FBclVxmCIQtI+usSZ6+oaV8X+8\\\"\"},\"body\":{\"message\":\"\",\"help\":{},\"errors\":[],\"configs\":[{\"owner\":\"{{email}}\",\"orka_vm_name\":\"demo-logs\",\"orka_base_image\":\"90GBigSurSSH.img\",\"orka_cpu_core\":3,\"vcpu_count\":3,\"iso_image\":\"None\",\"attached_disk\":\"None\",\"vnc_console\":true,\"io_boost\":true,\"use_saved_state\":false,\"gpu_passthrough\":false,\"system_serial\":\"N/A\",\"tag\":\"\",\"tag_required\":false,\"scheduler\":\"default\",\"memory\":\"automatic\"}]}},\"user\":{\"email\":\"{{email}}\",\"id\":\"dc440e6e-eacd-4a84-8800-cd153b4a5b58\"},\"createdAt\":\"2022-06-22T11:08:36.399Z\",\"level\":\"info\",\"logVersion\":\"2.0\"}}"
+                      resultType: streams
+                      stats:
+                        ingester:
+                          compressedBytes: 48978
+                          decompressedBytes: 661249
+                          decompressedLines: 487
+                          headChunkBytes: 14691
+                          headChunkLines: 15
+                          totalBatches: 1
+                          totalChunksMatched: 1
+                          totalDuplicates: 0
+                          totalLinesSent: 3
+                          totalReached: 16
+                        store:
+                          chunksDownloadTime: 0
+                          compressedBytes: 0
+                          decompressedBytes: 0
+                          decompressedLines: 0
+                          headChunkBytes: 0
+                          headChunkLines: 0
+                          totalChunksDownloaded: 0
+                          totalChunksRef: 0
+                          totalDuplicates: 0
+                        summary:
+                          bytesProcessedPerSecond: 8358710
+                          execTime: 0.080866544
+                          linesProcessedPerSecond: 6207
+                          totalBytesProcessed: 675940
+                          totalLinesProcessed: 502
+                    status: success
+  "/resources/image/checksum/{baseImage}":
+    get:
+      tags:
+        - Images
+      summary: Calculate image checksum
+      description: "> **NOTE**: This request is supported for Intel images only. Intel images have `.img` extension.\n\nRequest the MD5 file checksum for a base image in Orka cluster storage. The checksum can be used to verify file integrity for a downloaded or uploaded image. A `202` status code will be returned while the calculation is in progress and has not completed. A `404` status code will be returned if the image is not found.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header."
+      operationId: calculateImageChecksum
+      responses:
+        "200":
+          description: Calculate image checksum
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  checksum:
+                    type: string
+                    example: 1d1b1e8fa44aa6c6d9b26502305cc28e
+                  errors:
+                    type: array
+                    items: {}
+                    example: []
+                  help:
+                    type: object
+                    properties: {}
+                  image:
+                    type: string
+                    example: "{{baseImage}}"
+                  message:
+                    type: string
+                    example: ""
+              examples:
+                Calculate image checksum:
+                  value:
+                    checksum: 1d1b1e8fa44aa6c6d9b26502305cc28e
+                    errors: []
+                    help: {}
+                    image: "{{baseImage}}"
+                    message: ""
+        "202":
+          description: Calculation in progress
           content:
             application/json:
               schema:
@@ -138,984 +364,51 @@ paths:
                   help:
                     type: object
                     properties: {}
-                  logs:
+                  message:
+                    type: string
+                    example: "calculating checksum for image '{{baseImage}}'"
+              examples:
+                Calculation in progress:
+                  value:
+                    errors: []
+                    help: {}
+                    message: "calculating checksum for image '{{baseImage}}'"
+        "404":
+          description: Image not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
                     type: array
                     items:
                       type: object
                       properties:
-                        createdAt:
+                        message:
                           type: string
-                          example: "2021-05-12T16:04:00.929Z"
-                        id:
-                          type: string
-                          example: 06e22e80-a5fd-4799-a8ac-95915c2e0292
-                        logVersion:
-                          type: string
-                          example: "1.0"
-                        request:
-                          type: object
-                          properties:
-                            body:
-                              type: object
-                              properties: {}
-                            headers:
-                              type: object
-                              properties:
-                                accept:
-                                  type: string
-                                  example: "*/*"
-                                accept-encoding:
-                                  type: string
-                                  example: gzip
-                                connection:
-                                  type: string
-                                  example: close
-                                content-length:
-                                  type: string
-                                  example: "2"
-                                content-type:
-                                  type: string
-                                  example: application/json;charset=utf-8
-                                host:
-                                  type: string
-                                  example: "192.168.151.236:443"
-                                platform:
-                                  type: string
-                                  example: darwin
-                                release:
-                                  type: string
-                                  example: 19.6.0
-                                user-agent:
-                                  type: string
-                                  example: LogicMonitor
-                                x-cli-version:
-                                  type: string
-                                  example: 1.5.0
-                                x-forwarded-for:
-                                  type: string
-                                  example: 192.168.72.65
-                                x-forwarded-host:
-                                  type: string
-                                  example: "192.168.151.236:443"
-                                x-forwarded-port:
-                                  type: string
-                                  example: "443"
-                                x-forwarded-proto:
-                                  type: string
-                                  example: https
-                                x-forwarded-server:
-                                  type: string
-                                  example: traefik-ingress-controller-76d8b67dc4-4wqpm
-                                x-real-ip:
-                                  type: string
-                                  example: 192.168.72.65
-                            method:
-                              type: string
-                              example: GET
-                            url:
-                              type: string
-                              example: /
-                        response:
-                          type: object
-                          properties:
-                            body:
-                              type: object
-                              properties:
-                                api_version:
-                                  type: string
-                                  example: 1.5.3
-                                authenticated:
-                                  type: boolean
-                                  example: true
-                                configs:
-                                  type: array
-                                  items:
-                                    type: object
-                                    properties:
-                                      attached_disk:
-                                        type: string
-                                        example: None
-                                      gpu_passthrough:
-                                        type: boolean
-                                        example: false
-                                      io_boost:
-                                        type: boolean
-                                        example: false
-                                      iso_image:
-                                        type: string
-                                        example: None
-                                      orka_base_image:
-                                        type: string
-                                        example: "{{baseImage}}"
-                                      orka_cpu_core:
-                                        type: number
-                                        example: 6
-                                      orka_vm_name:
-                                        type: string
-                                        example: "{{vm}}"
-                                      owner:
-                                        type: string
-                                        example: "{{email}}"
-                                      use_saved_state:
-                                        type: boolean
-                                        example: false
-                                      vcpu_count:
-                                        type: number
-                                        example: 6
-                                      vnc_console:
-                                        type: boolean
-                                        example: true
-                                  example:
-                                    - attached_disk: None
-                                      gpu_passthrough: false
-                                      io_boost: false
-                                      iso_image: None
-                                      orka_base_image: "{{baseImage}}"
-                                      orka_cpu_core: 6
-                                      orka_vm_name: "{{vm}}"
-                                      owner: "{{email}}"
-                                      use_saved_state: false
-                                      vcpu_count: 6
-                                      vnc_console: true
-                                    - attached_disk: None
-                                      gpu_passthrough: true
-                                      io_boost: false
-                                      iso_image: None
-                                      orka_base_image: "{{baseImage}}"
-                                      orka_cpu_core: 6
-                                      orka_vm_name: "{{vm}}-gpu"
-                                      owner: "{{email}}"
-                                      use_saved_state: false
-                                      vcpu_count: 6
-                                      vnc_console: false
-                                email:
-                                  type: string
-                                  example: "{{email}}"
-                                errors:
-                                  type: array
-                                  items: {}
-                                  example: []
-                                failed_virtual_machine_resources:
-                                  type: array
-                                  items: {}
-                                  example: []
-                                help:
-                                  type: object
-                                  properties: {}
-                                is_token_revoked:
-                                  type: boolean
-                                  example: false
-                                message:
-                                  type: string
-                                  example: ""
-                                virtual_machine_resources:
-                                  type: array
-                                  items:
-                                    type: object
-                                    properties:
-                                      base_image:
-                                        type: string
-                                        example: "{{baseImage}}"
-                                      configuration_template:
-                                        type: string
-                                        example: default
-                                      cpu:
-                                        type: number
-                                        example: 6
-                                      gpu_passthrough:
-                                        type: boolean
-                                        example: false
-                                      image:
-                                        type: string
-                                        example: "{{vm}}"
-                                      io_boost:
-                                        type: boolean
-                                        example: false
-                                      owner:
-                                        type: string
-                                        example: "{{email}}"
-                                      use_saved_state:
-                                        type: boolean
-                                        example: false
-                                      vcpu:
-                                        type: number
-                                        example: 6
-                                      virtual_machine_name:
-                                        type: string
-                                        example: "{{vm}}"
-                                      vm_deployment_status:
-                                        type: string
-                                        example: Not Deployed
-                                  example:
-                                    - base_image: "{{baseImage}}"
-                                      configuration_template: default
-                                      cpu: 6
-                                      gpu_passthrough: false
-                                      image: "{{vm}}"
-                                      io_boost: false
-                                      owner: "{{email}}"
-                                      use_saved_state: false
-                                      vcpu: 6
-                                      virtual_machine_name: "{{vm}}"
-                                      vm_deployment_status: Not Deployed
-                                    - base_image: 90GCatalinaSSH.img
-                                      configuration_template: default
-                                      cpu: 3
-                                      gpu_passthrough: false
-                                      image: "{{vm}}"
-                                      io_boost: false
-                                      owner: "{{email}}"
-                                      use_saved_state: false
-                                      vcpu: 3
-                                      virtual_machine_name: "{{vm}}"
-                                      vm_deployment_status: Not Deployed
-                                    - base_image: "{{baseImage}}"
-                                      configuration_template: default
-                                      cpu: 6
-                                      gpu_passthrough: true
-                                      image: "{{vm}}"
-                                      io_boost: false
-                                      owner: "{{email}}"
-                                      use_saved_state: false
-                                      vcpu: 6
-                                      virtual_machine_name: "{{vm}}"
-                                      vm_deployment_status: Not Deployed
-                            headers:
-                              type: object
-                              properties:
-                                access-control-allow-origin:
-                                  type: string
-                                  example: "*"
-                                content-length:
-                                  example: 139
-                                  anyOf:
-                                    - type: number
-                                      example: 139
-                                    - type: string
-                                      example: "58"
-                                    - type: number
-                                      example: 139
-                                    - type: number
-                                      example: 139
-                                    - type: string
-                                      example: "570"
-                                    - type: string
-                                      example: "115"
-                                    - type: number
-                                      example: 187
-                                    - type: number
-                                      example: 139
-                                    - type: string
-                                      example: "928"
-                                    - type: string
-                                      example: "115"
-                                content-security-policy:
-                                  type: string
-                                  example: "default-src 'none'"
-                                content-type:
-                                  type: string
-                                  example: text/html; charset=utf-8
-                                etag:
-                                  type: string
-                                  example: "W/\"3a-31O1WutQkbVu0KijLTIsY3Pr0Ig\""
-                                x-content-type-options:
-                                  type: string
-                                  example: nosniff
-                            statusCode:
-                              type: number
-                              example: 404
-                        user:
-                          type: object
-                          properties:
-                            email:
-                              type: string
-                              example: "{{email}}"
-                            id:
-                              type: string
-                              example: 2e0fe8bc-9c26-4f44-b783-9dfc47a686f9
+                          example: "image '{{baseImage}}' not found"
                     example:
-                      - createdAt: "2021-05-12T16:04:00.929Z"
-                        id: 06e22e80-a5fd-4799-a8ac-95915c2e0292
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept-encoding: gzip
-                            host: "192.168.151.236:443"
-                            user-agent: LogicMonitor
-                            x-forwarded-for: 192.168.72.65
-                            x-forwarded-host: "192.168.151.236:443"
-                            x-forwarded-port: "443"
-                            x-forwarded-proto: https
-                            x-forwarded-server: traefik-ingress-controller-76d8b67dc4-4wqpm
-                            x-real-ip: 192.168.72.65
-                          method: GET
-                          url: /
-                        response:
-                          body: {}
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: 139
-                            content-security-policy: "default-src 'none'"
-                            content-type: text/html; charset=utf-8
-                            x-content-type-options: nosniff
-                          statusCode: 404
-                        user: {}
-                      - createdAt: "2021-05-12T16:03:52.497Z"
-                        id: fc67914d-bd5f-4a7a-9147-9bc436d3c80f
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept: "*/*"
-                            host: "{{host}}"
-                            user-agent: curl/7.64.1
-                          method: GET
-                          url: /health-check
-                        response:
-                          body:
-                            api_version: 1.5.3
-                            errors: []
-                            help: {}
-                            message: ""
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: "58"
-                            content-type: application/json; charset=utf-8
-                            etag: "W/\"3a-31O1WutQkbVu0KijLTIsY3Pr0Ig\""
-                          statusCode: 200
-                        user: {}
-                      - createdAt: "2021-05-12T16:03:00.917Z"
-                        id: 842141fd-c059-4c7e-bef9-74840ead7e4b
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept-encoding: gzip
-                            host: "192.168.151.236:443"
-                            user-agent: LogicMonitor
-                            x-forwarded-for: 192.168.72.65
-                            x-forwarded-host: "192.168.151.236:443"
-                            x-forwarded-port: "443"
-                            x-forwarded-proto: https
-                            x-forwarded-server: traefik-ingress-controller-76d8b67dc4-4wqpm
-                            x-real-ip: 192.168.72.65
-                          method: GET
-                          url: /
-                        response:
-                          body: {}
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: 139
-                            content-security-policy: "default-src 'none'"
-                            content-type: text/html; charset=utf-8
-                            x-content-type-options: nosniff
-                          statusCode: 404
-                        user: {}
-                      - createdAt: "2021-05-12T16:02:00.888Z"
-                        id: 5abff770-c819-46dc-a975-64e3084d5b5f
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept-encoding: gzip
-                            host: "192.168.151.236:443"
-                            user-agent: LogicMonitor
-                            x-forwarded-for: 192.168.72.65
-                            x-forwarded-host: "192.168.151.236:443"
-                            x-forwarded-port: "443"
-                            x-forwarded-proto: https
-                            x-forwarded-server: traefik-ingress-controller-76d8b67dc4-4wqpm
-                            x-real-ip: 192.168.72.65
-                          method: GET
-                          url: /
-                        response:
-                          body: {}
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: 139
-                            content-security-policy: "default-src 'none'"
-                            content-type: text/html; charset=utf-8
-                            x-content-type-options: nosniff
-                          statusCode: 404
-                        user: {}
-                      - createdAt: "2021-05-12T16:01:51.876Z"
-                        id: a1a0b5f2-7b86-43b8-9e09-956d07d2e0c0
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept: "application/json, text/plain, */*"
-                            connection: close
-                            content-length: "2"
-                            content-type: application/json;charset=utf-8
-                            host: "{{host}}"
-                            platform: darwin
-                            release: 19.6.0
-                            user-agent: orka-cli
-                            x-cli-version: 1.5.0
-                          method: GET
-                          url: /resources/vm/configs
-                        response:
-                          body:
-                            configs:
-                              - attached_disk: None
-                                gpu_passthrough: false
-                                io_boost: false
-                                iso_image: None
-                                orka_base_image: "{{baseImage}}"
-                                orka_cpu_core: 6
-                                orka_vm_name: "{{vm}}"
-                                owner: "{{email}}"
-                                use_saved_state: false
-                                vcpu_count: 6
-                                vnc_console: true
-                              - attached_disk: None
-                                gpu_passthrough: true
-                                io_boost: false
-                                iso_image: None
-                                orka_base_image: "{{baseImage}}"
-                                orka_cpu_core: 6
-                                orka_vm_name: "{{vm}}-gpu"
-                                owner: "{{email}}"
-                                use_saved_state: false
-                                vcpu_count: 6
-                                vnc_console: false
-                            errors: []
-                            help: {}
-                            message: ""
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: "570"
-                            content-type: application/json; charset=utf-8
-                            etag: "W/\"23a-m0uaWt51XUE4fsyUSVSaI5plUqQ\""
-                          statusCode: 200
-                        user:
-                          email: "{{email}}"
-                          id: 2e0fe8bc-9c26-4f44-b783-9dfc47a686f9
-                      - createdAt: "2021-05-12T16:01:51.646Z"
-                        id: da4f1697-d182-44d3-ae9e-70d901b22e4c
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept: "application/json, text/plain, */*"
-                            connection: close
-                            host: "{{host}}"
-                            platform: darwin
-                            release: 19.6.0
-                            user-agent: orka-cli
-                            x-cli-version: 1.5.0
-                          method: GET
-                          url: /token
-                        response:
-                          body:
-                            authenticated: true
-                            email: "{{email}}"
-                            errors: []
-                            help: {}
-                            is_token_revoked: false
-                            message: ""
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: "115"
-                            content-type: application/json; charset=utf-8
-                            etag: "W/\"73-1LQlAytr17JQJD2nnTzYf0tMQQg\""
-                          statusCode: 200
-                        user:
-                          email: "{{email}}"
-                          id: 2e0fe8bc-9c26-4f44-b783-9dfc47a686f9
-                      - createdAt: "2021-05-12T16:01:50.555Z"
-                        id: 6b0fffca-c8e5-44c5-9789-5555b84f994d
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            content-length: "293"
-                            host: orka.default.svc.cluster.local
-                          method: POST
-                          url: /servlets/netapp.servlets.admin.XMLrequest_filer
-                        response:
-                          body: {}
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: 187
-                            content-security-policy: "default-src 'none'"
-                            content-type: text/html; charset=utf-8
-                            x-content-type-options: nosniff
-                          statusCode: 404
-                        user: {}
-                      - createdAt: "2021-05-12T16:01:44.094Z"
-                        id: 1aaa13ad-21dc-4bf7-808f-a86c699846c9
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept-encoding: gzip
-                            host: "192.168.151.236:443"
-                            user-agent: SSLClient/1.0
-                            x-forwarded-for: 192.168.72.65
-                            x-forwarded-host: "192.168.151.236:443"
-                            x-forwarded-port: "443"
-                            x-forwarded-proto: https
-                            x-forwarded-server: traefik-ingress-controller-76d8b67dc4-4wqpm
-                            x-real-ip: 192.168.72.65
-                          method: GET
-                          url: /
-                        response:
-                          body: {}
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: 139
-                            content-security-policy: "default-src 'none'"
-                            content-type: text/html; charset=utf-8
-                            x-content-type-options: nosniff
-                          statusCode: 404
-                        user: {}
-                      - createdAt: "2021-05-12T16:01:42.268Z"
-                        id: 98cfa2fc-cc32-49c4-a75d-6f6f75faeb46
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept: "application/json, text/plain, */*"
-                            connection: close
-                            content-length: "2"
-                            content-type: application/json;charset=utf-8
-                            host: "{{host}}"
-                            platform: darwin
-                            release: 19.6.0
-                            user-agent: orka-cli
-                            x-cli-version: 1.5.0
-                          method: GET
-                          url: /resources/vm/list/all
-                        response:
-                          body:
-                            errors: []
-                            failed_virtual_machine_resources: []
-                            help: {}
-                            message: ""
-                            virtual_machine_resources:
-                              - base_image: "{{baseImage}}"
-                                configuration_template: default
-                                cpu: 6
-                                gpu_passthrough: false
-                                image: "{{vm}}"
-                                io_boost: false
-                                owner: "{{email}}"
-                                use_saved_state: false
-                                vcpu: 6
-                                virtual_machine_name: "{{vm}}"
-                                vm_deployment_status: Not Deployed
-                              - base_image: 90GCatalinaSSH.img
-                                configuration_template: default
-                                cpu: 3
-                                gpu_passthrough: false
-                                image: "{{vm}}"
-                                io_boost: false
-                                owner: "{{email}}"
-                                use_saved_state: false
-                                vcpu: 3
-                                virtual_machine_name: "{{vm}}"
-                                vm_deployment_status: Not Deployed
-                              - base_image: "{{baseImage}}"
-                                configuration_template: default
-                                cpu: 6
-                                gpu_passthrough: true
-                                image: "{{vm}}"
-                                io_boost: false
-                                owner: "{{email}}"
-                                use_saved_state: false
-                                vcpu: 6
-                                virtual_machine_name: "{{vm}}"
-                                vm_deployment_status: Not Deployed
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: "928"
-                            content-type: application/json; charset=utf-8
-                            etag: "W/\"3a0-MgH24dKBjppGUhD02asGXJuW/Ss\""
-                          statusCode: 200
-                        user:
-                          email: "{{email}}"
-                          id: 2e0fe8bc-9c26-4f44-b783-9dfc47a686f9
-                      - createdAt: "2021-05-12T16:01:41.906Z"
-                        id: 14bf949b-d75d-408a-964c-d0fd37d4991f
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept: "application/json, text/plain, */*"
-                            connection: close
-                            host: "{{host}}"
-                            platform: darwin
-                            release: 19.6.0
-                            user-agent: orka-cli
-                            x-cli-version: 1.5.0
-                          method: GET
-                          url: /token
-                        response:
-                          body:
-                            authenticated: true
-                            email: "{{email}}"
-                            errors: []
-                            help: {}
-                            is_token_revoked: false
-                            message: ""
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: "115"
-                            content-type: application/json; charset=utf-8
-                            etag: "W/\"73-1LQlAytr17JQJD2nnTzYf0tMQQg\""
-                          statusCode: 200
-                        user:
-                          email: "{{email}}"
-                          id: 2e0fe8bc-9c26-4f44-b783-9dfc47a686f9
+                      - message: "image '{{baseImage}}' not found"
+                  help:
+                    type: object
+                    properties: {}
                   message:
                     type: string
                     example: ""
               examples:
-                List 10 most recent logs:
+                Image not found:
                   value:
-                    errors: []
+                    errors:
+                      - message: "image '{{baseImage}}' not found"
                     help: {}
-                    logs:
-                      - createdAt: "2021-05-12T16:04:00.929Z"
-                        id: 06e22e80-a5fd-4799-a8ac-95915c2e0292
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept-encoding: gzip
-                            host: "192.168.151.236:443"
-                            user-agent: LogicMonitor
-                            x-forwarded-for: 192.168.72.65
-                            x-forwarded-host: "192.168.151.236:443"
-                            x-forwarded-port: "443"
-                            x-forwarded-proto: https
-                            x-forwarded-server: traefik-ingress-controller-76d8b67dc4-4wqpm
-                            x-real-ip: 192.168.72.65
-                          method: GET
-                          url: /
-                        response:
-                          body: {}
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: 139
-                            content-security-policy: "default-src 'none'"
-                            content-type: text/html; charset=utf-8
-                            x-content-type-options: nosniff
-                          statusCode: 404
-                        user: {}
-                      - createdAt: "2021-05-12T16:03:52.497Z"
-                        id: fc67914d-bd5f-4a7a-9147-9bc436d3c80f
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept: "*/*"
-                            host: "{{host}}"
-                            user-agent: curl/7.64.1
-                          method: GET
-                          url: /health-check
-                        response:
-                          body:
-                            api_version: 1.5.3
-                            errors: []
-                            help: {}
-                            message: ""
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: "58"
-                            content-type: application/json; charset=utf-8
-                            etag: "W/\"3a-31O1WutQkbVu0KijLTIsY3Pr0Ig\""
-                          statusCode: 200
-                        user: {}
-                      - createdAt: "2021-05-12T16:03:00.917Z"
-                        id: 842141fd-c059-4c7e-bef9-74840ead7e4b
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept-encoding: gzip
-                            host: "192.168.151.236:443"
-                            user-agent: LogicMonitor
-                            x-forwarded-for: 192.168.72.65
-                            x-forwarded-host: "192.168.151.236:443"
-                            x-forwarded-port: "443"
-                            x-forwarded-proto: https
-                            x-forwarded-server: traefik-ingress-controller-76d8b67dc4-4wqpm
-                            x-real-ip: 192.168.72.65
-                          method: GET
-                          url: /
-                        response:
-                          body: {}
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: 139
-                            content-security-policy: "default-src 'none'"
-                            content-type: text/html; charset=utf-8
-                            x-content-type-options: nosniff
-                          statusCode: 404
-                        user: {}
-                      - createdAt: "2021-05-12T16:02:00.888Z"
-                        id: 5abff770-c819-46dc-a975-64e3084d5b5f
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept-encoding: gzip
-                            host: "192.168.151.236:443"
-                            user-agent: LogicMonitor
-                            x-forwarded-for: 192.168.72.65
-                            x-forwarded-host: "192.168.151.236:443"
-                            x-forwarded-port: "443"
-                            x-forwarded-proto: https
-                            x-forwarded-server: traefik-ingress-controller-76d8b67dc4-4wqpm
-                            x-real-ip: 192.168.72.65
-                          method: GET
-                          url: /
-                        response:
-                          body: {}
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: 139
-                            content-security-policy: "default-src 'none'"
-                            content-type: text/html; charset=utf-8
-                            x-content-type-options: nosniff
-                          statusCode: 404
-                        user: {}
-                      - createdAt: "2021-05-12T16:01:51.876Z"
-                        id: a1a0b5f2-7b86-43b8-9e09-956d07d2e0c0
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept: "application/json, text/plain, */*"
-                            connection: close
-                            content-length: "2"
-                            content-type: application/json;charset=utf-8
-                            host: "{{host}}"
-                            platform: darwin
-                            release: 19.6.0
-                            user-agent: orka-cli
-                            x-cli-version: 1.5.0
-                          method: GET
-                          url: /resources/vm/configs
-                        response:
-                          body:
-                            configs:
-                              - attached_disk: None
-                                gpu_passthrough: false
-                                io_boost: false
-                                iso_image: None
-                                orka_base_image: "{{baseImage}}"
-                                orka_cpu_core: 6
-                                orka_vm_name: "{{vm}}"
-                                owner: "{{email}}"
-                                use_saved_state: false
-                                vcpu_count: 6
-                                vnc_console: true
-                              - attached_disk: None
-                                gpu_passthrough: true
-                                io_boost: false
-                                iso_image: None
-                                orka_base_image: "{{baseImage}}"
-                                orka_cpu_core: 6
-                                orka_vm_name: "{{vm}}-gpu"
-                                owner: "{{email}}"
-                                use_saved_state: false
-                                vcpu_count: 6
-                                vnc_console: false
-                            errors: []
-                            help: {}
-                            message: ""
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: "570"
-                            content-type: application/json; charset=utf-8
-                            etag: "W/\"23a-m0uaWt51XUE4fsyUSVSaI5plUqQ\""
-                          statusCode: 200
-                        user:
-                          email: "{{email}}"
-                          id: 2e0fe8bc-9c26-4f44-b783-9dfc47a686f9
-                      - createdAt: "2021-05-12T16:01:51.646Z"
-                        id: da4f1697-d182-44d3-ae9e-70d901b22e4c
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept: "application/json, text/plain, */*"
-                            connection: close
-                            host: "{{host}}"
-                            platform: darwin
-                            release: 19.6.0
-                            user-agent: orka-cli
-                            x-cli-version: 1.5.0
-                          method: GET
-                          url: /token
-                        response:
-                          body:
-                            authenticated: true
-                            email: "{{email}}"
-                            errors: []
-                            help: {}
-                            is_token_revoked: false
-                            message: ""
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: "115"
-                            content-type: application/json; charset=utf-8
-                            etag: "W/\"73-1LQlAytr17JQJD2nnTzYf0tMQQg\""
-                          statusCode: 200
-                        user:
-                          email: "{{email}}"
-                          id: 2e0fe8bc-9c26-4f44-b783-9dfc47a686f9
-                      - createdAt: "2021-05-12T16:01:50.555Z"
-                        id: 6b0fffca-c8e5-44c5-9789-5555b84f994d
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            content-length: "293"
-                            host: orka.default.svc.cluster.local
-                          method: POST
-                          url: /servlets/netapp.servlets.admin.XMLrequest_filer
-                        response:
-                          body: {}
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: 187
-                            content-security-policy: "default-src 'none'"
-                            content-type: text/html; charset=utf-8
-                            x-content-type-options: nosniff
-                          statusCode: 404
-                        user: {}
-                      - createdAt: "2021-05-12T16:01:44.094Z"
-                        id: 1aaa13ad-21dc-4bf7-808f-a86c699846c9
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept-encoding: gzip
-                            host: "192.168.151.236:443"
-                            user-agent: SSLClient/1.0
-                            x-forwarded-for: 192.168.72.65
-                            x-forwarded-host: "192.168.151.236:443"
-                            x-forwarded-port: "443"
-                            x-forwarded-proto: https
-                            x-forwarded-server: traefik-ingress-controller-76d8b67dc4-4wqpm
-                            x-real-ip: 192.168.72.65
-                          method: GET
-                          url: /
-                        response:
-                          body: {}
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: 139
-                            content-security-policy: "default-src 'none'"
-                            content-type: text/html; charset=utf-8
-                            x-content-type-options: nosniff
-                          statusCode: 404
-                        user: {}
-                      - createdAt: "2021-05-12T16:01:42.268Z"
-                        id: 98cfa2fc-cc32-49c4-a75d-6f6f75faeb46
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept: "application/json, text/plain, */*"
-                            connection: close
-                            content-length: "2"
-                            content-type: application/json;charset=utf-8
-                            host: "{{host}}"
-                            platform: darwin
-                            release: 19.6.0
-                            user-agent: orka-cli
-                            x-cli-version: 1.5.0
-                          method: GET
-                          url: /resources/vm/list/all
-                        response:
-                          body:
-                            errors: []
-                            failed_virtual_machine_resources: []
-                            help: {}
-                            message: ""
-                            virtual_machine_resources:
-                              - base_image: "{{baseImage}}"
-                                configuration_template: default
-                                cpu: 6
-                                gpu_passthrough: false
-                                image: "{{vm}}"
-                                io_boost: false
-                                owner: "{{email}}"
-                                use_saved_state: false
-                                vcpu: 6
-                                virtual_machine_name: "{{vm}}"
-                                vm_deployment_status: Not Deployed
-                              - base_image: 90GCatalinaSSH.img
-                                configuration_template: default
-                                cpu: 3
-                                gpu_passthrough: false
-                                image: "{{vm}}"
-                                io_boost: false
-                                owner: "{{email}}"
-                                use_saved_state: false
-                                vcpu: 3
-                                virtual_machine_name: "{{vm}}"
-                                vm_deployment_status: Not Deployed
-                              - base_image: "{{baseImage}}"
-                                configuration_template: default
-                                cpu: 6
-                                gpu_passthrough: true
-                                image: "{{vm}}"
-                                io_boost: false
-                                owner: "{{email}}"
-                                use_saved_state: false
-                                vcpu: 6
-                                virtual_machine_name: "{{vm}}"
-                                vm_deployment_status: Not Deployed
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: "928"
-                            content-type: application/json; charset=utf-8
-                            etag: "W/\"3a0-MgH24dKBjppGUhD02asGXJuW/Ss\""
-                          statusCode: 200
-                        user:
-                          email: "{{email}}"
-                          id: 2e0fe8bc-9c26-4f44-b783-9dfc47a686f9
-                      - createdAt: "2021-05-12T16:01:41.906Z"
-                        id: 14bf949b-d75d-408a-964c-d0fd37d4991f
-                        logVersion: "1.0"
-                        request:
-                          body: {}
-                          headers:
-                            accept: "application/json, text/plain, */*"
-                            connection: close
-                            host: "{{host}}"
-                            platform: darwin
-                            release: 19.6.0
-                            user-agent: orka-cli
-                            x-cli-version: 1.5.0
-                          method: GET
-                          url: /token
-                        response:
-                          body:
-                            authenticated: true
-                            email: "{{email}}"
-                            errors: []
-                            help: {}
-                            is_token_revoked: false
-                            message: ""
-                          headers:
-                            access-control-allow-origin: "*"
-                            content-length: "115"
-                            content-type: application/json; charset=utf-8
-                            etag: "W/\"73-1LQlAytr17JQJD2nnTzYf0tMQQg\""
-                          statusCode: 200
-                        user:
-                          email: "{{email}}"
-                          id: 2e0fe8bc-9c26-4f44-b783-9dfc47a686f9
                     message: ""
+    parameters:
+      - name: baseImage
+        in: path
+        required: true
+        schema:
+          type: string
   /resources/image/commit:
     post:
       tags:
@@ -1163,7 +456,7 @@ paths:
       tags:
         - Images
       summary: Copy image
-      description: "Copy an existing base image.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header."
+      description: "Copy an existing base image.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header."
       operationId: copyImage
       requestBody:
         content:
@@ -1296,12 +589,68 @@ paths:
                     errors: []
                     help: {}
                     message: "Successfully deleted: {{baseImage}}"
+  "/resources/image/download/{baseImage}":
+    get:
+      tags:
+        - Images
+      summary: Download an image
+      description: "> **NOTE**: This request is supported for Intel images only. Intel images have `.img` extension.\n\nDownload an image from Orka cluster storage to your local filesystem. A `404` status code will be returned if the image is not found.\n\n> NOTE: use the `--remote-name` or `--output` flags with curl to download an image.\n\nThe response will include the `Content-Disposition: attachment; filename=`,  \n`Content-Type: application/octet-stream` and  \n`Content-Length:` headers. See the response headers in the example.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header."
+      operationId: downloadAnImage
+      responses:
+        "200":
+          description: Download an image
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: "attachment; filename={{baseImage}}"
+            Content-Length:
+              schema:
+                type: string
+                example: "29815144448"
+          content: {}
+        "404":
+          description: Image not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                          example: "image file not found: {{baseImage}}"
+                    example:
+                      - message: "image file not found: {{baseImage}}"
+                  help:
+                    type: object
+                    properties: {}
+                  message:
+                    type: string
+                    example: ""
+              examples:
+                Image not found:
+                  value:
+                    errors:
+                      - message: "image file not found: {{baseImage}}"
+                    help: {}
+                    message: ""
+    parameters:
+      - name: baseImage
+        in: path
+        required: true
+        schema:
+          type: string
   /resources/image/generate:
     post:
       tags:
         - Images
       summary: Generate empty storage
-      description: "Generate an empty base image. You can use it to create VM configurations that will use an ISO or you can attach it to a deployed VM to extend its storage. You can specify size (in K, M, G, or T) and name for the new storage.\n\n> **NOTE:** The size limit for the storage depends on your plan and any base images and ISOs in your Orka storage. For more information, [contact us](https://portal.macstadium.com).\n> **NOTE:** Orka lists generated empty storage disks with a fixed size of ~192k. When attached to a VM and formatted, the disk will appear with its correct size in the VM.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header."
+      description: "> **NOTE**: This request is supported for Intel images only. Intel images have `.img` extension.\n\nGenerate an empty base image. You can use it to create VM configurations that will use an ISO or you can attach it to a deployed VM to extend its storage. You can specify size (in K, M, G, or T) and name for the new storage.\n\n> **NOTE:** The size limit for the storage depends on your plan and any base images and ISOs in your Orka storage. For more information, [contact us](https://portal.macstadium.com).  \n> **NOTE:** Orka lists generated empty storage disks with a fixed size of \\~192k. When attached to a VM and formatted, the disk will appear with its correct size in the VM.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header."
       operationId: generateEmptyStorage
       requestBody:
         content:
@@ -1396,20 +745,25 @@ paths:
                       properties:
                         date_added:
                           type: string
-                          example: "2019-11-11T23:03:58.560Z"
+                          example: "2022-01-28T15:44:32.156Z"
                         image:
                           type: string
-                          example: Mojave-Clean.img
+                          example: Monterey.orkasi
                         image_size:
                           type: string
-                          example: 17G
+                          example: 90G
                         modified:
                           type: string
-                          example: "2019-09-16T14:49:48.088Z"
+                          example: "2022-02-10T10:54:28.842Z"
                         owner:
                           type: string
                           example: all
                     example:
+                      - date_added: "2022-01-28T15:44:32.156Z"
+                        image: Monterey.orkasi
+                        image_size: 90G
+                        modified: "2022-02-10T10:54:28.842Z"
+                        owner: all
                       - date_added: "2019-11-11T23:03:58.560Z"
                         image: Mojave-Clean.img
                         image_size: 17G
@@ -1434,8 +788,9 @@ paths:
                     type: array
                     items:
                       type: string
-                      example: Mojave-Clean.img
+                      example: Monterey.orkasi
                     example:
+                      - Monterey.orkasi
                       - Mojave-Clean.img
                       - Mojave-Jenkins.img
                       - Mojave.img
@@ -1449,6 +804,11 @@ paths:
                     errors: []
                     help: {}
                     image_attributes:
+                      - date_added: "2022-01-28T15:44:32.156Z"
+                        image: Monterey.orkasi
+                        image_size: 90G
+                        modified: "2022-02-10T10:54:28.842Z"
+                        owner: all
                       - date_added: "2019-11-11T23:03:58.560Z"
                         image: Mojave-Clean.img
                         image_size: 17G
@@ -1470,6 +830,7 @@ paths:
                         modified: "2019-11-22T10:37:49.000Z"
                         owner: all
                     images:
+                      - Monterey.orkasi
                       - Mojave-Clean.img
                       - Mojave-Jenkins.img
                       - Mojave.img
@@ -1526,8 +887,9 @@ paths:
                     type: array
                     items:
                       type: string
-                      example: Mojave-Clean.img
+                      example: Monterey.orkasi
                     example:
+                      - Monterey.orkasi
                       - Mojave-Clean.img
                       - Test.img
                   message:
@@ -1539,6 +901,7 @@ paths:
                     errors: []
                     help: {}
                     images:
+                      - Monterey.orkasi
                       - Mojave-Clean.img
                       - Test.img
                     message: ""
@@ -1664,7 +1027,7 @@ paths:
       tags:
         - Images
       summary: Resize image
-      description: "Resize the current disk of a deployed VM and save it as a new base image. This does not affect the original base image of the VM.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header."
+      description: "> **NOTE**: This request is supported for Intel images only. Intel images have `.img` extension.\n\nResize the current disk of a deployed VM and save it as a new base image. This does not affect the original base image of the VM.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header."
       operationId: resizeImage
       requestBody:
         content:
@@ -2342,7 +1705,7 @@ paths:
       tags:
         - Images
       summary: Upload an image
-      description: "Upload an image to the Orka environment.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the Authorization: Bearer <token> header."
+      description: "> **NOTE**: This request is supported for Intel images only. Intel images have `.img` extension.\n\nUpload an image to the Orka environment.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the Authorization: Bearer header."
       operationId: uploadAnImage
       requestBody:
         content:
@@ -3263,6 +2626,292 @@ paths:
     get:
       tags:
         - Nodes
+      summary: List nodes
+      description: "Retrieve a list of the nodes in your Orka environment. Orka returns a list of nodes with IP and resource information.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header."
+      operationId: listNodes
+      responses:
+        "200":
+          description: List nodes (none dedicated)
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Content-Length:
+              schema:
+                type: string
+                example: "1227"
+            Date:
+              schema:
+                type: string
+                example: "Wed, 26 Jun 2019 15:12:30 GMT"
+            ETag:
+              schema:
+                type: string
+                example: "W/\"4cb-LcBj6ZxvJc12Mchuwg5oe8RNn1Q\""
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items: {}
+                    example: []
+                  help:
+                    type: object
+                    properties:
+                      check_orka_node_status:
+                        type: string
+                        example: "To check orka node status for a single node use endpoint {{domain}}/resources/node/status/<NODE_NAME>"
+                      create_virtual_machine_configuration:
+                        type: string
+                        example: "To create a virtual machine configuration, please use the endpoint {{domain}}/resources/vm/create"
+                      deploy_virtual_machine:
+                        type: string
+                        example: "To deploy a virtual machine node, make sure you have a configuration created and use the endpoint {{domain}}/resources/vm/deploy"
+                      required_request_data_for_create:
+                        type: object
+                        properties:
+                          orka_base_img:
+                            type: string
+                            example: "<ORKA_BASE_IMG>"
+                          orka_image:
+                            type: string
+                            example: "<ORKA_IMAGE>"
+                          orka_vm_name:
+                            type: string
+                            example: "<ORKA_VM_NAME>"
+                      required_request_data_for_deploy:
+                        type: object
+                        properties:
+                          orka_node_name:
+                            type: string
+                            example: "<ORKA_NODE_NAME>"
+                          orka_vm_name:
+                            type: string
+                            example: "<ORKA_VM_NAME>"
+                  message:
+                    type: string
+                    example: ""
+                  nodes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        address:
+                          type: string
+                          example: 10.221.188.4
+                        allocatable_cpu:
+                          type: number
+                          example: 24
+                        allocatable_gpu:
+                          type: string
+                          example: N/A
+                        available_cpu:
+                          type: number
+                          example: 12
+                        available_gpu:
+                          type: string
+                          example: N/A
+                        available_memory:
+                          type: string
+                          example: 32.49G
+                        hostIP:
+                          type: string
+                          example: 10.221.188.4
+                        host_name:
+                          type: string
+                          example: macpro-1
+                        name:
+                          type: string
+                          example: macpro-1
+                        node_type:
+                          type: string
+                          example: WORKER
+                        orka_tags:
+                          type: array
+                          items: {}
+                          example: []
+                        state:
+                          type: string
+                          example: READY
+                        total_cpu:
+                          type: number
+                          example: 24
+                        total_memory:
+                          type: string
+                          example: 62.92G
+                    example:
+                      - address: 10.221.188.4
+                        allocatable_cpu: 24
+                        allocatable_gpu: N/A
+                        available_cpu: 12
+                        available_gpu: N/A
+                        available_memory: 32.49G
+                        hostIP: 10.221.188.4
+                        host_name: macpro-1
+                        name: macpro-1
+                        node_type: WORKER
+                        orka_tags: []
+                        state: READY
+                        total_cpu: 24
+                        total_memory: 62.92G
+                      - address: 10.221.188.5
+                        allocatable_cpu: 24
+                        allocatable_gpu: N/A
+                        available_cpu: 12
+                        available_gpu: N/A
+                        available_memory: 32.72G
+                        hostIP: 10.221.188.5
+                        host_name: macpro-2
+                        name: macpro-2
+                        node_type: WORKER
+                        orka_tags: []
+                        state: READY
+                        total_cpu: 24
+                        total_memory: 62.92G
+                      - address: 10.221.188.6
+                        allocatable_cpu: 24
+                        allocatable_gpu: N/A
+                        available_cpu: 12
+                        available_gpu: N/A
+                        available_memory: 32.23G
+                        hostIP: 10.221.188.6
+                        host_name: macpro-3
+                        name: macpro-3
+                        node_type: WORKER
+                        orka_tags: []
+                        state: READY
+                        total_cpu: 24
+                        total_memory: 62.92G
+                      - address: 10.221.188.15
+                        allocatable_cpu: 8
+                        allocatable_gpu: N/A
+                        available_cpu: 8
+                        available_gpu: N/A
+                        available_memory: 15.39G
+                        hostIP: 10.221.188.15
+                        host_name: mini-arm-15
+                        name: mini-arm-15
+                        node_type: WORKER
+                        orka_tags: []
+                        state: READY
+                        total_cpu: 8
+                        total_memory: 15.39G
+                      - address: 10.221.188.16
+                        allocatable_cpu: 8
+                        allocatable_gpu: N/A
+                        available_cpu: 8
+                        available_gpu: N/A
+                        available_memory: 15.39G
+                        hostIP: 10.221.188.16
+                        host_name: mini-arm-16
+                        name: mini-arm-16
+                        node_type: WORKER
+                        orka_tags: []
+                        state: READY
+                        total_cpu: 8
+                        total_memory: 15.39G
+              examples:
+                List nodes (none dedicated):
+                  value:
+                    errors: []
+                    help:
+                      check_orka_node_status: "To check orka node status for a single node use endpoint {{domain}}/resources/node/status/<NODE_NAME>"
+                      create_virtual_machine_configuration: "To create a virtual machine configuration, please use the endpoint {{domain}}/resources/vm/create"
+                      deploy_virtual_machine: "To deploy a virtual machine node, make sure you have a configuration created and use the endpoint {{domain}}/resources/vm/deploy"
+                      required_request_data_for_create:
+                        orka_base_img: "<ORKA_BASE_IMG>"
+                        orka_image: "<ORKA_IMAGE>"
+                        orka_vm_name: "<ORKA_VM_NAME>"
+                      required_request_data_for_deploy:
+                        orka_node_name: "<ORKA_NODE_NAME>"
+                        orka_vm_name: "<ORKA_VM_NAME>"
+                    message: ""
+                    nodes:
+                      - address: 10.221.188.4
+                        allocatable_cpu: 24
+                        allocatable_gpu: N/A
+                        available_cpu: 12
+                        available_gpu: N/A
+                        available_memory: 32.49G
+                        hostIP: 10.221.188.4
+                        host_name: macpro-1
+                        name: macpro-1
+                        node_type: WORKER
+                        orka_tags: []
+                        state: READY
+                        total_cpu: 24
+                        total_memory: 62.92G
+                      - address: 10.221.188.5
+                        allocatable_cpu: 24
+                        allocatable_gpu: N/A
+                        available_cpu: 12
+                        available_gpu: N/A
+                        available_memory: 32.72G
+                        hostIP: 10.221.188.5
+                        host_name: macpro-2
+                        name: macpro-2
+                        node_type: WORKER
+                        orka_tags: []
+                        state: READY
+                        total_cpu: 24
+                        total_memory: 62.92G
+                      - address: 10.221.188.6
+                        allocatable_cpu: 24
+                        allocatable_gpu: N/A
+                        available_cpu: 12
+                        available_gpu: N/A
+                        available_memory: 32.23G
+                        hostIP: 10.221.188.6
+                        host_name: macpro-3
+                        name: macpro-3
+                        node_type: WORKER
+                        orka_tags: []
+                        state: READY
+                        total_cpu: 24
+                        total_memory: 62.92G
+                      - address: 10.221.188.15
+                        allocatable_cpu: 8
+                        allocatable_gpu: N/A
+                        available_cpu: 8
+                        available_gpu: N/A
+                        available_memory: 15.39G
+                        hostIP: 10.221.188.15
+                        host_name: mini-arm-15
+                        name: mini-arm-15
+                        node_type: WORKER
+                        orka_tags: []
+                        state: READY
+                        total_cpu: 8
+                        total_memory: 15.39G
+                      - address: 10.221.188.16
+                        allocatable_cpu: 8
+                        allocatable_gpu: N/A
+                        available_cpu: 8
+                        available_gpu: N/A
+                        available_memory: 15.39G
+                        hostIP: 10.221.188.16
+                        host_name: mini-arm-16
+                        name: mini-arm-16
+                        node_type: WORKER
+                        orka_tags: []
+                        state: READY
+                        total_cpu: 8
+                        total_memory: 15.39G
+  /resources/node/list/all:
+    get:
+      tags:
+        - Nodes
       summary: List all nodes (Admin)
       description: "Retrieve a list of the nodes in your Orka environment. Orka returns a list of nodes with IP and resource information.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header."
       operationId: listAllNodesAdmin
@@ -3274,7 +2923,7 @@ paths:
       tags:
         - Nodes
       summary: Enable sandbox
-      description: "Tag the specified node as sandbox. This limits deployment management from the Orka CLI. You can perform only Kubernetes deployment management with `kubectl`,  [Helm](https://helm.sh/docs/helm/#helm), and Tiller.\n\nThis operation requires both token and license authentication. You need to pass both the `orka-licensekey: <license>` and `Authorization: Bearer <token>` headers."
+      description: "> **NOTE**: This request is supported for Intel nodes only.\n\nTag the specified node as sandbox. This limits deployment management from the Orka CLI. You can perform only Kubernetes deployment management with `kubectl`, [Helm](https://helm.sh/docs/helm/#helm), and Tiller.\n\nThis operation requires both token and license authentication. You need to pass both the `orka-licensekey:` and `Authorization: Bearer` headers."
       operationId: enableSandbox
       requestBody:
         content:
@@ -3315,7 +2964,7 @@ paths:
       tags:
         - Nodes
       summary: Disable sandbox
-      description: "Remove the sandbox tag for the specified node. This re-enables deployment management with the Orka CLI.\n\nThis operation requires both token and license authentication. You need to pass both the orka-licensekey: <license> and Authorization: Bearer <token> headers."
+      description: "> **NOTE**: This request is supported for Intel nodes only.\n\nRemove the sandbox tag for the specified node. This re-enables deployment management with the Orka CLI.\n\nThis operation requires both token and license authentication. You need to pass both the orka-licensekey: and Authorization: Bearer headers."
       operationId: disableSandbox
       requestBody:
         content:
@@ -3361,7 +3010,7 @@ paths:
       operationId: checkNodeStatus
       responses:
         "200":
-          description: Check node status (sandbox)
+          description: Check node status (foundation)
           content:
             application/json:
               schema:
@@ -3383,32 +3032,87 @@ paths:
                       cpu:
                         type: number
                         example: 7
+                      gpu:
+                        type: number
+                        example: 1
                       memory:
                         type: string
                         example: 25.804G
                       nodeName:
                         type: string
                         example: "{{node}}"
+                      nodeType:
+                        type: string
+                        example: FOUNDATION
                       sandbox:
                         type: string
-                        example: "true"
+                        example: "false"
                       status:
                         type: string
-                        example: SANDBOX
+                        example: FOUNDATION
               examples:
-                Check node status (sandbox):
+                Check node status (foundation):
                   value:
                     errors: []
                     help: {}
                     message: ""
                     node_status:
                       cpu: 7
+                      gpu: 1
                       memory: 25.804G
                       nodeName: "{{node}}"
-                      sandbox: "true"
-                      status: SANDBOX
+                      nodeType: FOUNDATION
+                      sandbox: "false"
+                      status: FOUNDATION
     parameters:
       - name: node
+        in: path
+        required: true
+        schema:
+          type: string
+  "/resources/node/tag/{nodeTag}":
+    post:
+      tags:
+        - Nodes
+      summary: Tag node
+      description: "Mark a node with a custom tag. This allows when deploying a VM to target nodes having this custom tag.\n\nThis operation requires both token and license authentication. You need to pass both the `orka-licensekey:` and `Authorization: Bearer` headers."
+      operationId: tagNode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orka_node_name:
+                  type: string
+                  example: "{{node}}"
+            example:
+              orka_node_name: "{{node}}"
+      responses:
+        "200":
+          description: ""
+    delete:
+      tags:
+        - Nodes
+      summary: Untag node
+      description: "Remove a custom tag from a certain node.\n\nThis operation requires both token and license authentication. You need to pass both the `orka-licensekey:` and `Authorization: Bearer` headers."
+      operationId: untagNode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orka_node_name:
+                  type: string
+                  example: "{{node}}"
+            example:
+              orka_node_name: "{{node}}"
+      responses:
+        "200":
+          description: ""
+    parameters:
+      - name: nodeTag
         in: path
         required: true
         schema:
@@ -3561,7 +3265,7 @@ paths:
       tags:
         - VMs
       summary: Attach disk
-      description: "Attach a disk to the VM specified by ID. The VM must be deployed. The VM must be non-scaled.\n\nYou can attach any of the following disks:\n* Any disks created with `orka image generate`.\n* Any non-bootable images available in your Orka storage and listed by `orka image list`.\n\n> **IMPORTANT:** Before you can use the attached disk, you need to restart the VM with a [manual stop](https://documenter.getpostman.com/view/6574930/S1ETRGzt?version=latest#f312bc33-e0f2-4726-b926-4969e51f7d43) of the VM, followed by a [manual start](https://documenter.getpostman.com/view/6574930/S1ETRGzt?version=latest#a8add7c1-d3a0-43e0-a6cb-205637468ba2) VM. A software reboot from the OS will not trigger macOS to recognize the disk.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header."
+      description: "> **NOTE**: This request is supported for VMs deployed on Intel nodes only.\n\nAttach a disk to the VM specified by ID. The VM must be deployed. The VM must be non-scaled.\n\nYou can attach any of the following disks:\n\n*   Any disks created with `orka image generate`.\n*   Any non-bootable images available in your Orka storage and listed by `orka image list`.\n    \n\n> **IMPORTANT:** Before you can use the attached disk, you need to restart the VM with a [manual stop](https://documenter.getpostman.com/view/6574930/S1ETRGzt?version=latest#f312bc33-e0f2-4726-b926-4969e51f7d43) of the VM, followed by a [manual start](https://documenter.getpostman.com/view/6574930/S1ETRGzt?version=latest#a8add7c1-d3a0-43e0-a6cb-205637468ba2) VM. A software reboot from the OS will not trigger macOS to recognize the disk.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header."
       operationId: attachDisk
       requestBody:
         content:
@@ -3615,7 +3319,7 @@ paths:
       tags:
         - VMs
       summary: Clone VM
-      description: "Clone a deployed VM from a selected source node (`current_node_name`) to a destination node (`new_nodes`). You must specify the VM by ID. You can set only one destination node.\n\nThis operation retains the VM on the source node. The clone receives a new ID and might receive a new IP and assigned ports, based on the destination node.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header."
+      description: "> **NOTE**: This request is supported for VMs deployed on Intel nodes only.\n\nClone a deployed VM from a selected source node (`current_node_name`) to a destination node (`new_nodes`). You must specify the VM by ID. You can set only one destination node.\n\nThis operation retains the VM on the source node. The clone receives a new ID and might receive a new IP and assigned ports, based on the destination node.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header."
       operationId: cloneVm
       requestBody:
         content:
@@ -3731,6 +3435,17 @@ paths:
                         iso_image:
                           type: string
                           example: None
+                        memory:
+                          example: 10
+                          anyOf:
+                            - type: number
+                              example: 10
+                            - type: string
+                              example: automatic
+                            - type: string
+                              example: automatic
+                            - type: string
+                              example: automatic
                         orka_base_image:
                           type: string
                           example: "{{baseImage}}"
@@ -3743,6 +3458,18 @@ paths:
                         owner:
                           type: string
                           example: "{{email}}"
+                        scheduler:
+                          type: string
+                          example: default
+                        system_serial:
+                          type: string
+                          example: N/A
+                        tag:
+                          type: string
+                          example: node-pool
+                        tag_required:
+                          type: boolean
+                          example: false
                         use_saved_state:
                           type: boolean
                           example: false
@@ -3757,10 +3484,15 @@ paths:
                         gpu_passthrough: false
                         io_boost: false
                         iso_image: None
+                        memory: 10
                         orka_base_image: "{{baseImage}}"
                         orka_cpu_core: 6
                         orka_vm_name: "{{vm}}"
                         owner: "{{email}}"
+                        scheduler: default
+                        system_serial: N/A
+                        tag: node-pool
+                        tag_required: false
                         use_saved_state: false
                         vcpu_count: 6
                         vnc_console: true
@@ -3768,10 +3500,15 @@ paths:
                         gpu_passthrough: false
                         io_boost: false
                         iso_image: None
+                        memory: automatic
                         orka_base_image: "{{baseImage}}"
                         orka_cpu_core: 3
                         orka_vm_name: "{{vm}}1"
                         owner: "{{email}}"
+                        scheduler: default
+                        system_serial: N/A
+                        tag: node-pool
+                        tag_required: false
                         use_saved_state: false
                         vcpu_count: 3
                         vnc_console: false
@@ -3779,10 +3516,15 @@ paths:
                         gpu_passthrough: false
                         io_boost: false
                         iso_image: None
+                        memory: automatic
                         orka_base_image: "{{baseImage}}"
                         orka_cpu_core: 6
                         orka_vm_name: "{{vm}}2"
                         owner: "{{email}}"
+                        scheduler: default
+                        system_serial: N/A
+                        tag: node-pool
+                        tag_required: false
                         use_saved_state: false
                         vcpu_count: 6
                         vnc_console: true
@@ -3790,6 +3532,7 @@ paths:
                         gpu_passthrough: false
                         io_boost: false
                         iso_image: "{{iso}}"
+                        memory: automatic
                         orka_base_image: "{{storageImage}}"
                         orka_cpu_core: 12
                         orka_vm_name: "{{vm}}3"
@@ -3815,10 +3558,15 @@ paths:
                         gpu_passthrough: false
                         io_boost: false
                         iso_image: None
+                        memory: 10
                         orka_base_image: "{{baseImage}}"
                         orka_cpu_core: 6
                         orka_vm_name: "{{vm}}"
                         owner: "{{email}}"
+                        scheduler: default
+                        system_serial: N/A
+                        tag: node-pool
+                        tag_required: false
                         use_saved_state: false
                         vcpu_count: 6
                         vnc_console: true
@@ -3826,10 +3574,15 @@ paths:
                         gpu_passthrough: false
                         io_boost: false
                         iso_image: None
+                        memory: automatic
                         orka_base_image: "{{baseImage}}"
                         orka_cpu_core: 3
                         orka_vm_name: "{{vm}}1"
                         owner: "{{email}}"
+                        scheduler: default
+                        system_serial: N/A
+                        tag: node-pool
+                        tag_required: false
                         use_saved_state: false
                         vcpu_count: 3
                         vnc_console: false
@@ -3837,10 +3590,15 @@ paths:
                         gpu_passthrough: false
                         io_boost: false
                         iso_image: None
+                        memory: automatic
                         orka_base_image: "{{baseImage}}"
                         orka_cpu_core: 6
                         orka_vm_name: "{{vm}}2"
                         owner: "{{email}}"
+                        scheduler: default
+                        system_serial: N/A
+                        tag: node-pool
+                        tag_required: false
                         use_saved_state: false
                         vcpu_count: 6
                         vnc_console: true
@@ -3848,6 +3606,7 @@ paths:
                         gpu_passthrough: false
                         io_boost: false
                         iso_image: "{{iso}}"
+                        memory: automatic
                         orka_base_image: "{{storageImage}}"
                         orka_cpu_core: 12
                         orka_vm_name: "{{vm}}3"
@@ -3863,7 +3622,7 @@ paths:
       tags:
         - VMs
       summary: Save VM State
-      description: "Save a VM configuration state (disk and memory). You must specify the VM by ID. Now when you deploy the VM configuration it will use the saved state to boot the VM.\n\nThe VM must be deployed. If VM state is previously saved, it is overwritten. To overwrite the VM state, it must not be used by any deployed VM.\n\n> **NOTE:** Saving VM state is restricted only to VMs that have GPU passthrough disabled.\n\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header."
+      description: "> **NOTE**: This request is supported for VMs deployed on Intel nodes only.\n\nSave a VM configuration state (disk and memory). You must specify the VM by ID. Now when you deploy the VM configuration it will use the saved state to boot the VM.\n\nThe VM must be deployed. If VM state is previously saved, it is overwritten. To overwrite the VM state, it must not be used by any deployed VM.\n\n> **NOTE:** Saving VM state is restricted only to VMs that have GPU passthrough disabled.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header."
       operationId: saveVmState
       requestBody:
         content:
@@ -3917,7 +3676,7 @@ paths:
             example: ""
       responses:
         "200":
-          description: Get VM configuration by name
+          description: Get VM configuration by name without custom memory
           headers:
             Access-Control-Allow-Origin:
               schema:
@@ -3961,6 +3720,9 @@ paths:
                         iso_image:
                           type: string
                           example: None
+                        memory:
+                          type: string
+                          example: automatic
                         orka_base_image:
                           type: string
                           example: "{{baseImage}}"
@@ -3973,6 +3735,18 @@ paths:
                         owner:
                           type: string
                           example: "{{email}}"
+                        scheduler:
+                          type: string
+                          example: default
+                        system_serial:
+                          type: string
+                          example: N/A
+                        tag:
+                          type: string
+                          example: node-pool
+                        tag_required:
+                          type: boolean
+                          example: false
                         use_saved_state:
                           type: boolean
                           example: false
@@ -3984,10 +3758,15 @@ paths:
                         gpu_passthrough: false
                         io_boost: false
                         iso_image: None
+                        memory: automatic
                         orka_base_image: "{{baseImage}}"
                         orka_cpu_core: 6
                         orka_vm_name: "{{vm}}"
                         owner: "{{email}}"
+                        scheduler: default
+                        system_serial: N/A
+                        tag: node-pool
+                        tag_required: false
                         use_saved_state: false
                         vnc_console: true
                   errors:
@@ -4001,17 +3780,22 @@ paths:
                     type: string
                     example: ""
               examples:
-                Get VM configuration by name:
+                Get VM configuration by name without custom memory:
                   value:
                     configs:
                       - attached_disk: None
                         gpu_passthrough: false
                         io_boost: false
                         iso_image: None
+                        memory: automatic
                         orka_base_image: "{{baseImage}}"
                         orka_cpu_core: 6
                         orka_vm_name: "{{vm}}"
                         owner: "{{email}}"
+                        scheduler: default
+                        system_serial: N/A
+                        tag: node-pool
+                        tag_required: false
                         use_saved_state: false
                         vnc_console: true
                     errors: []
@@ -4028,7 +3812,7 @@ paths:
       tags:
         - VMs
       summary: Delete VM State
-      description: "Delete a VM configuration state. You must specify the VM in the request URL by name. Now when you deploy the VM configuration it will use the base image to boot the VM.\n\nTo delete a VM state, it must not be used by any deployed VM.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header."
+      description: "> **NOTE**: This request is supported for VMs deployed on Intel nodes only.\n\nDelete a VM configuration state. You must specify the VM in the request URL by name. Now when you deploy the VM configuration it will use the base image to boot the VM.\n\nTo delete a VM state, it must not be used by any deployed VM.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header."
       operationId: deleteVmState
       requestBody:
         content:
@@ -4073,7 +3857,7 @@ paths:
       tags:
         - VMs
       summary: Create VM configuration
-      description: "Create a [VM configuration](https://orkadocs.macstadium.com/docs/orka-glossary#section-vm-configuration) that is ready for deployment. In Orka, VM configurations are container templates.\n\nYou can deploy multiple VMs from a single VM configuration. You cannot modify VM configurations.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header.\n\n_Usage:_\n* `orka_vm_name`: Required. The name of the VM configuration. This string must consist of lowercase Latin alphanumeric characters or the dash (`-`). This string must begin and end with an alphanumeric character. This string must not exceed 38 characters.\n* `orka_base_image`: Required. The name of the base image that you want to use with the configuration.<br/>If you want to attach an ISO to the VM configuration from which to install macOS, make sure that the base image is an empty disk of a sufficient size.\n* `orka_image`: Required. A name for the [snapshot image](https://orkadocs.macstadium.com/docs/orka-glossary#section-snapshot-image) of the VM. Typically, the same value as `orka_vm_name`.\n* `orka_cpu_core`: Required. The number of CPU cores to dedicate for the VM. Must be 3, 4, 6, 8, 12, or 24.\n* `vcpu_count`: Required. The number of vCPUs for the VM. Must equal the number of CPUs, when CPU is less than or equal to 3. Otherwise, must equal half of or exactly the number of CPUs specified.\n* `iso_image`: Optional. An ISO to attach to the VM on deployment.\n* `attached_disk`: Optional. An additional storage disk to attach to the VM on deployment.\n* `vnc_console`: Optional. By default, `true`. Enables or disables VNC for the VM configuration. You can override on deployment of specific VMs.\n* `system_serial`: Optional. Assign an owned macOS system serial number to the VM configuration.\n* `io_boost`: Optional. By default, `false` for VM configurations created before Orka 1.5. Default value for VM configurations created with Orka 1.5 or later depends on the cluster default. Enables or disables IO performance improvements for the VM configuration.\n* `gpu_passthrough`: Optional. Enables or disables GPU passthrough for the VM. When enabled, `vnc_console` is automatically disabled.\n\n> **IMPORTANT** GPU passthrough is an experimental feature. GPU passthrough must first be enabled in your cluster. Contact the [MacStadium team](https://portal.macstadium.com/login) for more details."
+      description: "Create a [VM configuration](https://orkadocs.macstadium.com/docs/orka-glossary#section-vm-configuration) that is ready for deployment. In Orka, VM configurations are container templates.\n\nYou can deploy multiple VMs from a single VM configuration. You cannot modify VM configurations.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header.\n\n*Usage:*\n\n*   `orka_vm_name`: Required. The name of the VM configuration. This string must consist of lowercase Latin alphanumeric characters or the dash (`-`). This string must begin and end with an alphanumeric character. This string must not exceed 38 characters.\n*   `orka_base_image`: Required. The name of the base image that you want to use with the configuration.  \n    If you want to attach an ISO to the VM configuration from which to install macOS, make sure that the base image is an empty disk of a sufficient size.\n*   `orka_image`: Required. A name for the [snapshot image](https://orkadocs.macstadium.com/docs/orka-glossary#section-snapshot-image) of the VM. Typically, the same value as `orka_vm_name`.\n*   `orka_cpu_core`: Required. The number of CPU cores to dedicate for the VM. Must be 3, 4, 6, 8, 12, or 24.\n*   `vcpu_count`: Required. The number of vCPUs for the VM. Must equal the number of CPUs, when CPU is less than or equal to 3. Otherwise, must equal half of or exactly the number of CPUs specified.\n*   `iso_image`: Optional. An ISO to attach to the VM on deployment. The option is supported for VMs deployed on Intel nodes only.\n*   `attached_disk`: Optional. An additional storage disk to attach to the VM on deployment. The option is supported for VMs deployed on Intel nodes only.\n*   `vnc_console`: Optional. By default, `true`. Enables or disables VNC for the VM configuration. You can override on deployment of specific VMs. The option is supported for VMs deployed on Intel nodes only.\n*   `system_serial`: Optional. Assign an owned macOS system serial number to the VM configuration. The option is supported for VMs deployed on Intel nodes only.\n*   `io_boost`: Optional. By default, `false` for VM configurations created before Orka 1.5. Default value for VM configurations created with Orka 1.5 or later depends on the cluster default. Enables or disables IO performance improvements for the VM configuration. The option is supported for VMs deployed on Intel nodes only.\n*   `gpu_passthrough`: Optional. Enables or disables GPU passthrough for the VM. When enabled, `vnc_console` is automatically disabled. The option is supported for VMs deployed on Intel nodes only.\n    \n\n> **IMPORTANT** GPU passthrough must first be enabled in your cluster. Contact the [MacStadium team](https://portal.macstadium.com/login) for more details.\n\n*   `tag`: Optional. When specified, the VM is preferred to be deployed to a node marked with this tag.\n*   `tag_required`: Optional. By default, `false`. When set to `true`, the VM is required to be deployed to a node marked with this tag.\n*   `scheduler`: Optional. Possible values are `default` and `most-allocated`. By default, `default`. When set to `most-allocated` VMs deployed from the VM configuration will be scheduled to nodes having most of their resources allocated. `default` keeps used vs free resources balanced between the nodes."
       operationId: createVmConfiguration
       requestBody:
         content:
@@ -4099,9 +3883,18 @@ paths:
                 orka_vm_name:
                   type: string
                   example: "{{vm}}"
+                scheduler:
+                  type: string
+                  example: default
                 system_serial:
                   type: string
                   example: "{{systemSerial}}"
+                tag:
+                  type: string
+                  example: "{{nodeTag}}"
+                tag_required:
+                  type: boolean
+                  example: false
                 vcpu_count:
                   type: number
                   example: 12
@@ -4115,12 +3908,40 @@ paths:
               orka_cpu_core: 12
               orka_image: "{{vm}}"
               orka_vm_name: "{{vm}}"
+              scheduler: default
               system_serial: "{{systemSerial}}"
+              tag: "{{nodeTag}}"
+              tag_required: false
               vcpu_count: 12
               vnc_console: true
       responses:
         "201":
-          description: Create VM configuration with custom serial number
+          description: Create VM configuration with custom memory
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Content-Length:
+              schema:
+                type: string
+                example: "328"
+            Date:
+              schema:
+                type: string
+                example: "Wed, 26 Jun 2019 15:14:28 GMT"
+            ETag:
+              schema:
+                type: string
+                example: "W/\"148-fA6PVN+4I0P9g9krkNwq78LKurU\""
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
           content:
             application/json:
               schema:
@@ -4149,7 +3970,7 @@ paths:
                     type: string
                     example: Successfully Created
               examples:
-                Create VM configuration with custom serial number:
+                Create VM configuration with custom memory:
                   value:
                     errors: []
                     help:
@@ -4225,7 +4046,7 @@ paths:
       tags:
         - VMs
       summary: Deploy VM configuration
-      description: "Deploy an existing VM configuration to a node. If you don't specify a node, Orka chooses a node based on the available resources.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header.\n\n_Usage:_\n- `orka_vm_name`: Required. The name of the VM configuration that you want to deploy.\n- `orka_node_name`: Optional. The name of the node on which to deploy the VM. The node must have sufficient CPU and memory to accommodate the VM.\n- `replicas`: Optional. The scale at which to deploy the VM configuration. If not specified, defaults to `1` (non-scaled).\n- `reserved_ports`: Optional. One or more port mappings that enable additional ports on your VM. You need to map a port from the node to a port on the VM in the following format `<NODE PORT>:<VM PORT>`. The following ports and port ranges are reserved and cannot be used: `22`, `443`, `6443`, `5000-5014`, `5999-6013`, `8822-8836`. You can pass multiple mappings, separated by a comma.\n- `iso_install`: Optional. Set to `true` if you want to use an ISO.\n- `iso_image`: Optional. An ISO to attach to the VM during deployment. If already set in the respective VM configuration and not set here, Orka applies the setting from the VM configuration. You can also use this field to override any ISO specified in the VM configuration.\n- `attach_disk`: Optional. Set to `true` if you want to attach additional storage during deployment.\n- `attached_disk`: Optional. An additional storage disk to attach to the VM during deployment. If already set in the respective VM configuration and not set here, Orka applies the setting from the VM configuration. You can also use this field to override any storage specified in the VM configuration.\n- `vnc_console`: Optional. Enables or disables VNC for the VM. If not set in the VM configuration or here, defaults to `true`. If already set in the respective VM configuration and not set here, Orka applies the setting from the VM configuration. You can also use this field to override the VNC setting specified in the VM configuration.\n- `vm_metadata`: Optional. Inject custom metadata to the VM. You need to provide the metadata in format `\"items\": [{\"key\": \"<KEY>\", \"value\": \"<VALUE>\"}]`. If not set, only the built-in metadata is injected into the VM.\n- `system_serial`: Optional. Assign an owned macOS system serial number to the VM. If already set in the respective VM configuration and not set here, Orka applies the setting from the VM configuration.\n- `gpu_passthrough`: Optional. Enables or disables GPU passthrough for the VM. If not set in the VM configuration or here, defaults to `false`. If already set in the respective VM configuration and not set here, Orka applies the setting from the VM configuration. You can also use this field to override the GPU passthrough setting specified in the VM configuration. When enabled, `vnc_console` is automatically disabled.\n\n> **IMPORTANT** GPU passthrough is an experimental feature. GPU passthrough must first be enabled in your cluster. Contact the [MacStadium team](https://portal.macstadium.com/login) for more details."
+      description: "Deploy an existing VM configuration to a node. If you don't specify a node, Orka chooses a node based on the available resources.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header.\n\n*Usage:*\n\n*   `orka_vm_name`: Required. The name of the VM configuration that you want to deploy.\n*   `orka_node_name`: Optional. The name of the node on which to deploy the VM. The node must have sufficient CPU and memory to accommodate the VM.\n*   `replicas`: Optional. The scale at which to deploy the VM configuration. If not specified, defaults to `1` (non-scaled). The option is supported for VMs deployed on Intel nodes only.\n*   `reserved_ports`: Optional. One or more port mappings that enable additional ports on your VM. You need to map a port from the node to a port on the VM in the following format `:`. The following ports and port ranges are reserved and cannot be used: `22`, `443`, `6443`, `5000-5014`, `5999-6013`, `8822-8836`. You can pass multiple mappings, separated by a comma.\n*   `iso_install`: Optional. Set to `true` if you want to use an ISO. The option is supported for VMs deployed on Intel nodes only.\n*   `iso_image`: Optional. An ISO to attach to the VM during deployment. If already set in the respective VM configuration and not set here, Orka applies the setting from the VM configuration. You can also use this field to override any ISO specified in the VM configuration. The option is supported for VMs deployed on Intel nodes only.\n*   `attach_disk`: Optional. Set to `true` if you want to attach additional storage during deployment. The option is supported for VMs deployed on Intel nodes only.\n*   `attached_disk`: Optional. An additional storage disk to attach to the VM during deployment. If already set in the respective VM configuration and not set here, Orka applies the setting from the VM configuration. You can also use this field to override any storage specified in the VM configuration. The option is supported for VMs deployed on Intel nodes only.\n*   `vnc_console`: Optional. Enables or disables VNC for the VM. If not set in the VM configuration or here, defaults to `true`. If already set in the respective VM configuration and not set here, Orka applies the setting from the VM configuration. You can also use this field to override the VNC setting specified in the VM configuration. The option is supported for VMs deployed on Intel nodes only.\n*   `vm_metadata`: Optional. Inject custom metadata to the VM. You need to provide the metadata in format `\"items\": [{\"key\": \"\", \"value\": \"\"}]`. If not set, only the built-in metadata is injected into the VM. The option is supported for VMs deployed on Intel nodes only.\n*   `system_serial`: Optional. Assign an owned macOS system serial number to the VM. If already set in the respective VM configuration and not set here, Orka applies the setting from the VM configuration. The option is supported for VMs deployed on Intel nodes only.\n*   `gpu_passthrough`: Optional. Enables or disables GPU passthrough for the VM. If not set in the VM configuration or here, defaults to `false`. If already set in the respective VM configuration and not set here, Orka applies the setting from the VM configuration. You can also use this field to override the GPU passthrough setting specified in the VM configuration. When enabled, `vnc_console` is automatically disabled. The option is supported for VMs deployed on Intel nodes only.\n    \n\n> **IMPORTANT** GPU passthrough must first be enabled in your cluster. Contact the [MacStadium team](https://portal.macstadium.com/login) for more details.\n\n*   `tag`: Optional. When specified, the VM is preferred to be deployed to a node marked with this tag.\n*   `tag_required`: Optional. By default, `false`. When set to `true`, the VM is required to be deployed to a node marked with this tag.\n*   `scheduler`: Optional. Possible values are `default` and `most-allocated`. By default, `default`. When set to `most-allocated` The deployed VM will be scheduled to nodes having most of their resources allocated. `default` keeps used vs free resources balanced between the nodes."
       operationId: deployVmConfiguration
       requestBody:
         content:
@@ -4264,9 +4085,18 @@ paths:
                     example: "<NODE PORT>:<VM PORT>"
                   example:
                     - "<NODE PORT>:<VM PORT>"
+                scheduler:
+                  type: string
+                  example: default
                 system_serial:
                   type: string
                   example: "{{systemSerial}}"
+                tag:
+                  type: string
+                  example: "{{nodeTag}}"
+                tag_required:
+                  type: boolean
+                  example: false
                 vm_metadata:
                   type: object
                   properties:
@@ -4298,7 +4128,10 @@ paths:
               replicas: 2
               reserved_ports:
                 - "<NODE PORT>:<VM PORT>"
+              scheduler: default
               system_serial: "{{systemSerial}}"
+              tag: "{{nodeTag}}"
+              tag_required: false
               vm_metadata:
                 items:
                   - key: "<KEY>"
@@ -4306,7 +4139,7 @@ paths:
               vnc_console: true
       responses:
         "200":
-          description: Deploy VM configuration with custom metadata
+          description: Deploy VM configuration with VM scheduler
           content:
             application/json:
               schema:
@@ -4316,6 +4149,9 @@ paths:
                     type: array
                     items: {}
                     example: []
+                  gpu_passthrough:
+                    type: boolean
+                    example: false
                   help:
                     type: object
                     properties:
@@ -4343,6 +4179,9 @@ paths:
                   host_cpu:
                     type: string
                     example: "6"
+                  io_boost:
+                    type: boolean
+                    example: true
                   ip:
                     type: string
                     example: "{{vmIP}}"
@@ -4362,6 +4201,9 @@ paths:
                   ssh_port:
                     type: string
                     example: "8824"
+                  use_saved_state:
+                    type: boolean
+                    example: false
                   vcpu:
                     type: string
                     example: "6"
@@ -4372,9 +4214,10 @@ paths:
                     type: string
                     example: "6001"
               examples:
-                Deploy VM configuration with custom metadata:
+                Deploy VM configuration with VM scheduler:
                   value:
                     errors: []
+                    gpu_passthrough: false
                     help:
                       data_for_virtual_machine_exec_tasks:
                         orka_vm_name: "{{vm}}"
@@ -4384,12 +4227,14 @@ paths:
                       suspend_virtual_machine: "To suspend a VM send rest request to {{domain}}/resources/vm/exec/suspend"
                       virtual_machine_vnc: "Once started and deployed, you can use VNC to access it via {{vmIP}}:6001"
                     host_cpu: "6"
+                    io_boost: true
                     ip: "{{vmIP}}"
                     message: Successfully deployed VM
                     port_warnings: []
                     ram: 15G
                     screen_share_port: "5902"
                     ssh_port: "8824"
+                    use_saved_state: false
                     vcpu: "6"
                     vm_id: "{{vmID}}"
                     vnc_port: "6001"
@@ -4398,7 +4243,7 @@ paths:
       tags:
         - VMs
       summary: Resume VM
-      description: "Resume the VM specified by name or ID. The VM must already be suspended.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header.\n\n_Usage:_\n* When you specify the VM by name, you need to specify a node as well. This resumes all VMs with the specified name on the specified node.\n* When you specify the VM by ID, you don't need to specify the node."
+      description: "> **NOTE**: This request is supported for VMs deployed on Intel nodes only.\n\nResume the VM specified by name or ID. The VM must already be suspended.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header.\n\n*Usage:*\n\n*   When you specify the VM by name, you need to specify a node as well. This resumes all VMs with the specified name on the specified node.\n*   When you specify the VM by ID, you don't need to specify the node."
       operationId: resumeVm
       requestBody:
         content:
@@ -4501,7 +4346,7 @@ paths:
       tags:
         - VMs
       summary: Revert VM
-      description: "Revert the specified VM to the latest state of its base image. This operation restarts the VM. You can specify the VM by name, name and node, or ID.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header.\n\n_Usage:_\n* When you specify the VM by name and there are multiple VMs with that name, you need to specify a node as well. This reverts all VMs with the specified name on the specified node.\n* When you specify the VM by ID, you don't need to specify the node."
+      description: "> **NOTE**: This request is supported for VMs deployed on Intel nodes only.\n\nRevert the specified VM to the latest state of its base image. This operation restarts the VM. You can specify the VM by name, name and node, or ID.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header.\n\n*Usage:*\n\n*   When you specify the VM by name and there are multiple VMs with that name, you need to specify a node as well. This reverts all VMs with the specified name on the specified node.\n*   When you specify the VM by ID, you don't need to specify the node."
       operationId: revertVm
       requestBody:
         content:
@@ -4612,7 +4457,7 @@ paths:
       tags:
         - VMs
       summary: Start VM
-      description: "Power ON the VM specified by name or ID.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header.\n\n_Usage:_\n* When you specify the VM by name, you need to specify a node as well. This starts all VMs with the specified name on the specified node.\n* When you specify the VM by ID, you don't need to specify the node."
+      description: "> **NOTE:** This request is supported for VMs deployed on Intel nodes only\n\nPower ON the VM specified by name or ID.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header.\n\n*Usage:*\n\n*   When you specify the VM by name, you need to specify a node as well. This starts all VMs with the specified name on the specified node.\n*   When you specify the VM by ID, you don't need to specify the node."
       operationId: startVm
       requestBody:
         content:
@@ -4715,7 +4560,7 @@ paths:
       tags:
         - VMs
       summary: Stop VM
-      description: "Power OFF the VM specified by name and node or by ID.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header.\n\n_Usage:_\n* When you specify the VM by name, you need to specify a node as well. This stops all VMs with the specified name on the specified node.\n* When you specify the VM by ID, you don't need to specify the node."
+      description: "> **NOTE**: This request is supported for VMs deployed on Intel nodes only.\n\nPower OFF the VM specified by name and node or by ID.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header.\n\n*Usage:*\n\n*   When you specify the VM by name, you need to specify a node as well. This stops all VMs with the specified name on the specified node.\n*   When you specify the VM by ID, you don't need to specify the node."
       operationId: stopVm
       requestBody:
         content:
@@ -4826,7 +4671,7 @@ paths:
       tags:
         - VMs
       summary: Suspend VM
-      description: "Suspend the VM specified by name or ID.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header.\n\n_Usage:_\n* When you specify the VM by name, you need to specify a node as well. This suspends all VMs with the specified name on the specified node.\n* When you specify the VM by ID, you don't need to specify the node."
+      description: "> **NOTE**: This request is supported for VMs deployed on Intel nodes only.\n\nSuspend the VM specified by name or ID.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header.\n\n*Usage:*\n\n*   When you specify the VM by name, you need to specify a node as well. This suspends all VMs with the specified name on the specified node.\n*   When you specify the VM by ID, you don't need to specify the node."
       operationId: suspendVm
       requestBody:
         content:
@@ -4941,7 +4786,7 @@ paths:
       operationId: listYourVMs
       responses:
         "200":
-          description: List your VMs
+          description: List your VMs with scaled VMs expanded
           headers:
             Access-Control-Allow-Origin:
               schema:
@@ -5001,7 +4846,7 @@ paths:
                           example: false
                         image:
                           type: string
-                          example: "{{vm}}1"
+                          example: "{{vm}}2"
                         io_boost:
                           type: boolean
                           example: false
@@ -5028,6 +4873,12 @@ paths:
                               creationTimestamp:
                                 type: string
                                 example: "2020-07-28T11:09:25Z"
+                              creation_timestamp:
+                                type: string
+                                example: "2022-02-10T14:01:26Z"
+                              gpu:
+                                type: string
+                                example: N/A
                               image:
                                 type: string
                                 example: "{{vm}}"
@@ -5043,6 +4894,9 @@ paths:
                               owner:
                                 type: string
                                 example: "{{email}}"
+                              replicas:
+                                type: number
+                                example: 1
                               reserved_ports:
                                 type: array
                                 items:
@@ -5073,6 +4927,12 @@ paths:
                               ssh_port:
                                 type: string
                                 example: "8822"
+                              tag:
+                                type: string
+                                example: "{{nodeTag}}"
+                              tag_required:
+                                type: boolean
+                                example: false
                               use_saved_state:
                                 type: boolean
                                 example: false
@@ -5100,11 +4960,13 @@ paths:
                               configuration_template: default
                               cpu: 3
                               creationTimestamp: "2020-07-28T11:09:25Z"
+                              gpu: N/A
                               image: "{{vm}}"
                               io_boost: false
                               node_location: "{{node}}"
                               node_status: UP
                               owner: "{{email}}"
+                              replicas: 1
                               reserved_ports:
                                 - guest_port: 5999
                                   host_port: 5999
@@ -5117,6 +4979,8 @@ paths:
                                   protocol: TCP
                               screen_sharing_port: "5900"
                               ssh_port: "8822"
+                              tag: "{{nodeTag}}"
+                              tag_required: false
                               use_saved_state: false
                               vcpu: 3
                               virtual_machine_id: "{{vmID}}"
@@ -5124,6 +4988,111 @@ paths:
                               virtual_machine_name: "{{vm}}"
                               vm_status: running
                               vnc_port: "5999"
+                            - RAM: 15.00G
+                              base_image: "{{baseImage}}"
+                              configuration_template: default
+                              cpu: 3
+                              creation_timestamp: "2022-02-10T14:01:26Z"
+                              gpu: N/A
+                              image: "{{vm}}1"
+                              io_boost: true
+                              node_location: "{{node}}"
+                              node_status: UP
+                              owner: "{{email}}"
+                              replicas: 1
+                              reserved_ports:
+                                - guest_port: 5999
+                                  host_port: 5999
+                                  protocol: TCP
+                                - guest_port: 5900
+                                  host_port: 5900
+                                  protocol: TCP
+                                - guest_port: 8821
+                                  host_port: 8822
+                                  protocol: TCP
+                              screen_sharing_port: "5900"
+                              ssh_port: "8822"
+                              tag: ""
+                              tag_required: false
+                              use_saved_state: false
+                              vcpu: 3
+                              virtual_machine_id: "{{vmID}}1"
+                              virtual_machine_ip: "{{vmIP}}"
+                              virtual_machine_name: "{{vm}}1"
+                              vm_status: running
+                              vnc_port: "5999"
+                            - RAM: 15.00G
+                              base_image: "{{baseImage}}"
+                              configuration_template: default
+                              cpu: 3
+                              creation_timestamp: "2022-02-10T14:01:45Z"
+                              gpu: N/A
+                              image: "{{vm}}1"
+                              io_boost: true
+                              node_location: "{{node}}"
+                              node_status: UP
+                              owner: "{{email}}"
+                              replicas: 1
+                              reserved_ports:
+                                - guest_port: 5999
+                                  host_port: 6000
+                                  protocol: TCP
+                                - guest_port: 5900
+                                  host_port: 5901
+                                  protocol: TCP
+                                - guest_port: 8821
+                                  host_port: 8823
+                                  protocol: TCP
+                              screen_sharing_port: "5901"
+                              ssh_port: "8823"
+                              tag: ""
+                              tag_required: false
+                              use_saved_state: false
+                              vcpu: 3
+                              virtual_machine_id: "{{vmID}}1"
+                              virtual_machine_ip: "{{vmIP}}"
+                              virtual_machine_name: "{{vm}}1"
+                              vm_status: running
+                              vnc_port: "6000"
+                            - RAM: 15.00G
+                              base_image: "{{baseImage}}"
+                              configuration_template: default
+                              cpu: 3
+                              creation_timestamp: "2022-02-10T14:01:50Z"
+                              gpu: N/A
+                              image: "{{vm}}1"
+                              io_boost: true
+                              node_location: "{{node}}"
+                              node_status: UP
+                              owner: "{{email}}"
+                              replicas: 1
+                              reserved_ports:
+                                - guest_port: 5999
+                                  host_port: 6001
+                                  protocol: TCP
+                                - guest_port: 5900
+                                  host_port: 5902
+                                  protocol: TCP
+                                - guest_port: 8821
+                                  host_port: 8824
+                                  protocol: TCP
+                              screen_sharing_port: "5902"
+                              ssh_port: "8824"
+                              tag: ""
+                              tag_required: false
+                              use_saved_state: false
+                              vcpu: 3
+                              virtual_machine_id: "{{vmID}}1"
+                              virtual_machine_ip: "{{vmIP}}"
+                              virtual_machine_name: "{{vm}}1"
+                              vm_status: running
+                              vnc_port: "6001"
+                        tag:
+                          type: string
+                          example: "{{nodeTag}}"
+                        tag_required:
+                          type: boolean
+                          example: false
                         use_saved_state:
                           type: boolean
                           example: false
@@ -5143,11 +5112,13 @@ paths:
                             configuration_template: default
                             cpu: 3
                             creationTimestamp: "2020-07-28T11:09:25Z"
+                            gpu: N/A
                             image: "{{vm}}"
                             io_boost: false
                             node_location: "{{node}}"
                             node_status: UP
                             owner: "{{email}}"
+                            replicas: 1
                             reserved_ports:
                               - guest_port: 5999
                                 host_port: 5999
@@ -5160,6 +5131,8 @@ paths:
                                 protocol: TCP
                             screen_sharing_port: "5900"
                             ssh_port: "8822"
+                            tag: "{{nodeTag}}"
+                            tag_required: false
                             use_saved_state: false
                             vcpu: 3
                             virtual_machine_id: "{{vmID}}"
@@ -5167,21 +5140,122 @@ paths:
                             virtual_machine_name: "{{vm}}"
                             vm_status: running
                             vnc_port: "5999"
+                          - RAM: 15.00G
+                            base_image: "{{baseImage}}"
+                            configuration_template: default
+                            cpu: 3
+                            creation_timestamp: "2022-02-10T14:01:26Z"
+                            gpu: N/A
+                            image: "{{vm}}1"
+                            io_boost: true
+                            node_location: "{{node}}"
+                            node_status: UP
+                            owner: "{{email}}"
+                            replicas: 1
+                            reserved_ports:
+                              - guest_port: 5999
+                                host_port: 5999
+                                protocol: TCP
+                              - guest_port: 5900
+                                host_port: 5900
+                                protocol: TCP
+                              - guest_port: 8821
+                                host_port: 8822
+                                protocol: TCP
+                            screen_sharing_port: "5900"
+                            ssh_port: "8822"
+                            tag: ""
+                            tag_required: false
+                            use_saved_state: false
+                            vcpu: 3
+                            virtual_machine_id: "{{vmID}}1"
+                            virtual_machine_ip: "{{vmIP}}"
+                            virtual_machine_name: "{{vm}}1"
+                            vm_status: running
+                            vnc_port: "5999"
+                          - RAM: 15.00G
+                            base_image: "{{baseImage}}"
+                            configuration_template: default
+                            cpu: 3
+                            creation_timestamp: "2022-02-10T14:01:45Z"
+                            gpu: N/A
+                            image: "{{vm}}1"
+                            io_boost: true
+                            node_location: "{{node}}"
+                            node_status: UP
+                            owner: "{{email}}"
+                            replicas: 1
+                            reserved_ports:
+                              - guest_port: 5999
+                                host_port: 6000
+                                protocol: TCP
+                              - guest_port: 5900
+                                host_port: 5901
+                                protocol: TCP
+                              - guest_port: 8821
+                                host_port: 8823
+                                protocol: TCP
+                            screen_sharing_port: "5901"
+                            ssh_port: "8823"
+                            tag: ""
+                            tag_required: false
+                            use_saved_state: false
+                            vcpu: 3
+                            virtual_machine_id: "{{vmID}}1"
+                            virtual_machine_ip: "{{vmIP}}"
+                            virtual_machine_name: "{{vm}}1"
+                            vm_status: running
+                            vnc_port: "6000"
+                          - RAM: 15.00G
+                            base_image: "{{baseImage}}"
+                            configuration_template: default
+                            cpu: 3
+                            creation_timestamp: "2022-02-10T14:01:50Z"
+                            gpu: N/A
+                            image: "{{vm}}1"
+                            io_boost: true
+                            node_location: "{{node}}"
+                            node_status: UP
+                            owner: "{{email}}"
+                            replicas: 1
+                            reserved_ports:
+                              - guest_port: 5999
+                                host_port: 6001
+                                protocol: TCP
+                              - guest_port: 5900
+                                host_port: 5902
+                                protocol: TCP
+                              - guest_port: 8821
+                                host_port: 8824
+                                protocol: TCP
+                            screen_sharing_port: "5902"
+                            ssh_port: "8824"
+                            tag: ""
+                            tag_required: false
+                            use_saved_state: false
+                            vcpu: 3
+                            virtual_machine_id: "{{vmID}}1"
+                            virtual_machine_ip: "{{vmIP}}"
+                            virtual_machine_name: "{{vm}}1"
+                            vm_status: running
+                            vnc_port: "6001"
                         virtual_machine_name: "{{vm}}"
                         vm_deployment_status: Deployed
                       - base_image: "{{baseImage}}"
                         configuration_template: default
                         cpu: 6
                         gpu_passthrough: false
-                        image: "{{vm}}1"
+                        image: "{{vm}}2"
                         io_boost: false
                         owner: "{{email}}"
+                        tag: "{{nodeTag}}"
+                        tag_required: false
                         use_saved_state: false
                         vcpu: 6
-                        virtual_machine_name: "{{vm}}1"
+                        virtual_machine_name: "{{vm}}2"
                         vm_deployment_status: Not Deployed
               examples:
-                List your VMs:
+                List your VMs with scaled VMs expanded:
                   value:
                     errors: []
                     help: {}
@@ -5193,11 +5267,13 @@ paths:
                             configuration_template: default
                             cpu: 3
                             creationTimestamp: "2020-07-28T11:09:25Z"
+                            gpu: N/A
                             image: "{{vm}}"
                             io_boost: false
                             node_location: "{{node}}"
                             node_status: UP
                             owner: "{{email}}"
+                            replicas: 1
                             reserved_ports:
                               - guest_port: 5999
                                 host_port: 5999
@@ -5210,6 +5286,8 @@ paths:
                                 protocol: TCP
                             screen_sharing_port: "5900"
                             ssh_port: "8822"
+                            tag: "{{nodeTag}}"
+                            tag_required: false
                             use_saved_state: false
                             vcpu: 3
                             virtual_machine_id: "{{vmID}}"
@@ -5217,25 +5295,126 @@ paths:
                             virtual_machine_name: "{{vm}}"
                             vm_status: running
                             vnc_port: "5999"
+                          - RAM: 15.00G
+                            base_image: "{{baseImage}}"
+                            configuration_template: default
+                            cpu: 3
+                            creation_timestamp: "2022-02-10T14:01:26Z"
+                            gpu: N/A
+                            image: "{{vm}}1"
+                            io_boost: true
+                            node_location: "{{node}}"
+                            node_status: UP
+                            owner: "{{email}}"
+                            replicas: 1
+                            reserved_ports:
+                              - guest_port: 5999
+                                host_port: 5999
+                                protocol: TCP
+                              - guest_port: 5900
+                                host_port: 5900
+                                protocol: TCP
+                              - guest_port: 8821
+                                host_port: 8822
+                                protocol: TCP
+                            screen_sharing_port: "5900"
+                            ssh_port: "8822"
+                            tag: ""
+                            tag_required: false
+                            use_saved_state: false
+                            vcpu: 3
+                            virtual_machine_id: "{{vmID}}1"
+                            virtual_machine_ip: "{{vmIP}}"
+                            virtual_machine_name: "{{vm}}1"
+                            vm_status: running
+                            vnc_port: "5999"
+                          - RAM: 15.00G
+                            base_image: "{{baseImage}}"
+                            configuration_template: default
+                            cpu: 3
+                            creation_timestamp: "2022-02-10T14:01:45Z"
+                            gpu: N/A
+                            image: "{{vm}}1"
+                            io_boost: true
+                            node_location: "{{node}}"
+                            node_status: UP
+                            owner: "{{email}}"
+                            replicas: 1
+                            reserved_ports:
+                              - guest_port: 5999
+                                host_port: 6000
+                                protocol: TCP
+                              - guest_port: 5900
+                                host_port: 5901
+                                protocol: TCP
+                              - guest_port: 8821
+                                host_port: 8823
+                                protocol: TCP
+                            screen_sharing_port: "5901"
+                            ssh_port: "8823"
+                            tag: ""
+                            tag_required: false
+                            use_saved_state: false
+                            vcpu: 3
+                            virtual_machine_id: "{{vmID}}1"
+                            virtual_machine_ip: "{{vmIP}}"
+                            virtual_machine_name: "{{vm}}1"
+                            vm_status: running
+                            vnc_port: "6000"
+                          - RAM: 15.00G
+                            base_image: "{{baseImage}}"
+                            configuration_template: default
+                            cpu: 3
+                            creation_timestamp: "2022-02-10T14:01:50Z"
+                            gpu: N/A
+                            image: "{{vm}}1"
+                            io_boost: true
+                            node_location: "{{node}}"
+                            node_status: UP
+                            owner: "{{email}}"
+                            replicas: 1
+                            reserved_ports:
+                              - guest_port: 5999
+                                host_port: 6001
+                                protocol: TCP
+                              - guest_port: 5900
+                                host_port: 5902
+                                protocol: TCP
+                              - guest_port: 8821
+                                host_port: 8824
+                                protocol: TCP
+                            screen_sharing_port: "5902"
+                            ssh_port: "8824"
+                            tag: ""
+                            tag_required: false
+                            use_saved_state: false
+                            vcpu: 3
+                            virtual_machine_id: "{{vmID}}1"
+                            virtual_machine_ip: "{{vmIP}}"
+                            virtual_machine_name: "{{vm}}1"
+                            vm_status: running
+                            vnc_port: "6001"
                         virtual_machine_name: "{{vm}}"
                         vm_deployment_status: Deployed
                       - base_image: "{{baseImage}}"
                         configuration_template: default
                         cpu: 6
                         gpu_passthrough: false
-                        image: "{{vm}}1"
+                        image: "{{vm}}2"
                         io_boost: false
                         owner: "{{email}}"
+                        tag: "{{nodeTag}}"
+                        tag_required: false
                         use_saved_state: false
                         vcpu: 6
-                        virtual_machine_name: "{{vm}}1"
+                        virtual_machine_name: "{{vm}}2"
                         vm_deployment_status: Not Deployed
   /resources/vm/list-disks:
     post:
       tags:
         - VMs
       summary: List disks
-      description: "List the disks attached to the VM specified by ID. The VM must be deployed. The VM must be non-scaled.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header."
+      description: "> **NOTE**: This request is supported for VMs deployed on Intel nodes only.\n\nList the disks attached to the VM specified by ID. The VM must be deployed. The VM must be non-scaled.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header."
       operationId: listDisks
       requestBody:
         content:
@@ -5399,6 +5578,9 @@ paths:
                               creationTimestamp:
                                 type: string
                                 example: "2020-07-28T11:09:25Z"
+                              gpu:
+                                type: string
+                                example: N/A
                               image:
                                 type: string
                                 example: "{{vm}}"
@@ -5414,6 +5596,9 @@ paths:
                               owner:
                                 type: string
                                 example: "{{email}}"
+                              replicas:
+                                type: number
+                                example: 1
                               reserved_ports:
                                 type: array
                                 items:
@@ -5444,6 +5629,12 @@ paths:
                               ssh_port:
                                 type: string
                                 example: "8822"
+                              tag:
+                                type: string
+                                example: "{{nodeTag}}"
+                              tag_required:
+                                type: boolean
+                                example: false
                               use_saved_state:
                                 type: boolean
                                 example: false
@@ -5471,11 +5662,13 @@ paths:
                               configuration_template: default
                               cpu: 12
                               creationTimestamp: "2020-07-28T11:09:25Z"
+                              gpu: N/A
                               image: "{{vm}}"
                               io_boost: false
                               node_location: "{{node}}"
                               node_status: UP
                               owner: "{{email}}"
+                              replicas: 1
                               reserved_ports:
                                 - guest_port: 5999
                                   host_port: 5999
@@ -5488,6 +5681,8 @@ paths:
                                   protocol: TCP
                               screen_sharing_port: "5900"
                               ssh_port: "8822"
+                              tag: "{{nodeTag}}"
+                              tag_required: false
                               use_saved_state: false
                               vcpu: 12
                               virtual_machine_id: "{{vmID}}"
@@ -5495,6 +5690,12 @@ paths:
                               virtual_machine_name: "{{vm}}"
                               vm_status: running
                               vnc_port: "5999"
+                        tag:
+                          type: string
+                          example: "{{nodeTag}}"
+                        tag_required:
+                          type: boolean
+                          example: false
                         use_saved_state:
                           type: boolean
                           example: false
@@ -5514,11 +5715,13 @@ paths:
                             configuration_template: default
                             cpu: 12
                             creationTimestamp: "2020-07-28T11:09:25Z"
+                            gpu: N/A
                             image: "{{vm}}"
                             io_boost: false
                             node_location: "{{node}}"
                             node_status: UP
                             owner: "{{email}}"
+                            replicas: 1
                             reserved_ports:
                               - guest_port: 5999
                                 host_port: 5999
@@ -5531,6 +5734,8 @@ paths:
                                 protocol: TCP
                             screen_sharing_port: "5900"
                             ssh_port: "8822"
+                            tag: "{{nodeTag}}"
+                            tag_required: false
                             use_saved_state: false
                             vcpu: 12
                             virtual_machine_id: "{{vmID}}"
@@ -5547,6 +5752,8 @@ paths:
                         image: "{{vm}}1"
                         io_boost: false
                         owner: "{{newEmail}}"
+                        tag: "{{nodeTag}}"
+                        tag_required: false
                         use_saved_state: false
                         vcpu: 12
                         virtual_machine_name: "{{vm}}1"
@@ -5564,11 +5771,13 @@ paths:
                             configuration_template: default
                             cpu: 12
                             creationTimestamp: "2020-07-28T11:09:25Z"
+                            gpu: N/A
                             image: "{{vm}}"
                             io_boost: false
                             node_location: "{{node}}"
                             node_status: UP
                             owner: "{{email}}"
+                            replicas: 1
                             reserved_ports:
                               - guest_port: 5999
                                 host_port: 5999
@@ -5581,6 +5790,8 @@ paths:
                                 protocol: TCP
                             screen_sharing_port: "5900"
                             ssh_port: "8822"
+                            tag: "{{nodeTag}}"
+                            tag_required: false
                             use_saved_state: false
                             vcpu: 12
                             virtual_machine_id: "{{vmID}}"
@@ -5597,6 +5808,8 @@ paths:
                         image: "{{vm}}1"
                         io_boost: false
                         owner: "{{newEmail}}"
+                        tag: "{{nodeTag}}"
+                        tag_required: false
                         use_saved_state: false
                         vcpu: 12
                         virtual_machine_name: "{{vm}}1"
@@ -5693,6 +5906,9 @@ paths:
                               creationTimestamp:
                                 type: string
                                 example: "2020-07-28T11:09:25Z"
+                              gpu:
+                                type: string
+                                example: N/A
                               image:
                                 type: string
                                 example: "{{vm}}"
@@ -5708,6 +5924,9 @@ paths:
                               owner:
                                 type: string
                                 example: "{{email}}"
+                              replicas:
+                                type: number
+                                example: 1
                               reserved_ports:
                                 type: array
                                 items:
@@ -5738,6 +5957,12 @@ paths:
                               ssh_port:
                                 type: string
                                 example: "8822"
+                              tag:
+                                type: string
+                                example: "{{nodeTag}}"
+                              tag_required:
+                                type: boolean
+                                example: false
                               use_saved_state:
                                 type: boolean
                                 example: false
@@ -5765,11 +5990,13 @@ paths:
                               configuration_template: default
                               cpu: 12
                               creationTimestamp: "2020-07-28T11:09:25Z"
+                              gpu: N/A
                               image: "{{vm}}"
                               io_boost: false
                               node_location: "{{node}}"
                               node_status: UP
                               owner: "{{email}}"
+                              replicas: 1
                               reserved_ports:
                                 - guest_port: 5999
                                   host_port: 5999
@@ -5782,6 +6009,8 @@ paths:
                                   protocol: TCP
                               screen_sharing_port: "5900"
                               ssh_port: "8822"
+                              tag: "{{nodeTag}}"
+                              tag_required: false
                               use_saved_state: false
                               vcpu: 12
                               virtual_machine_id: "{{vmID}}"
@@ -5789,6 +6018,12 @@ paths:
                               virtual_machine_name: "{{vm}}"
                               vm_status: running
                               vnc_port: "5999"
+                        tag:
+                          type: string
+                          example: "{{nodeTag}}"
+                        tag_required:
+                          type: boolean
+                          example: false
                         use_saved_state:
                           type: boolean
                           example: false
@@ -5808,11 +6043,13 @@ paths:
                             configuration_template: default
                             cpu: 12
                             creationTimestamp: "2020-07-28T11:09:25Z"
+                            gpu: N/A
                             image: "{{vm}}"
                             io_boost: false
                             node_location: "{{node}}"
                             node_status: UP
                             owner: "{{email}}"
+                            replicas: 1
                             reserved_ports:
                               - guest_port: 5999
                                 host_port: 5999
@@ -5825,6 +6062,8 @@ paths:
                                 protocol: TCP
                             screen_sharing_port: "5900"
                             ssh_port: "8822"
+                            tag: "{{nodeTag}}"
+                            tag_required: false
                             use_saved_state: false
                             vcpu: 12
                             virtual_machine_id: "{{vmID}}"
@@ -5841,6 +6080,8 @@ paths:
                         image: "{{vm}}"
                         io_boost: false
                         owner: "{{email}}"
+                        tag: "{{nodeTag}}"
+                        tag_required: false
                         use_saved_state: false
                         vcpu: 12
                         virtual_machine_name: "{{vm}}1"
@@ -5858,11 +6099,13 @@ paths:
                             configuration_template: default
                             cpu: 12
                             creationTimestamp: "2020-07-28T11:09:25Z"
+                            gpu: N/A
                             image: "{{vm}}"
                             io_boost: false
                             node_location: "{{node}}"
                             node_status: UP
                             owner: "{{email}}"
+                            replicas: 1
                             reserved_ports:
                               - guest_port: 5999
                                 host_port: 5999
@@ -5875,6 +6118,8 @@ paths:
                                 protocol: TCP
                             screen_sharing_port: "5900"
                             ssh_port: "8822"
+                            tag: "{{nodeTag}}"
+                            tag_required: false
                             use_saved_state: false
                             vcpu: 12
                             virtual_machine_id: "{{vmID}}"
@@ -5891,6 +6136,8 @@ paths:
                         image: "{{vm}}"
                         io_boost: false
                         owner: "{{email}}"
+                        tag: "{{nodeTag}}"
+                        tag_required: false
                         use_saved_state: false
                         vcpu: 12
                         virtual_machine_name: "{{vm}}1"
@@ -5906,7 +6153,7 @@ paths:
       tags:
         - VMs
       summary: Migrate VM
-      description: "Migrate a deployed VM from a selected source node (`current_node_name`) to another destination node (`new_nodes`). You must specify the VM by ID. You can set only one destination node. The destination node should be different from the source node.\n\nThis operation changes the IP of the migrated VM and might change its assigned ports. This operation removes the VM from the source node.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header."
+      description: "> **NOTE**: This request is supported for VMs deployed on Intel nodes only.\n\nMigrate a deployed VM from a selected source node (`current_node_name`) to another destination node (`new_nodes`). You must specify the VM by ID. You can set only one destination node. The destination node should be different from the source node.\n\nThis operation changes the IP of the migrated VM and might change its assigned ports. This operation removes the VM from the source node.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header."
       operationId: migrateVm
       requestBody:
         content:
@@ -6077,7 +6324,7 @@ paths:
       tags:
         - VMs
       summary: Un-scale VM
-      description: "Un-scale a scaled VM. This removes any additional replicas of the VM and leaves only one running copy. You must specify the VM by ID. The VM must be deployed.\n\nWhen you scale down, you have no control over which replicas will be destroyed and which one will be preserved. This might result in loss of data.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer <token>` header."
+      description: "> **NOTE**: This request is supported for VMs deployed on Intel nodes only.\n\nUn-scale a scaled VM. This removes any additional replicas of the VM and leaves only one running copy. You must specify the VM by ID. The VM must be deployed.\n\nWhen you scale down, you have no control over which replicas will be destroyed and which one will be preserved. This might result in loss of data.\n\nThis is a non-administrative operation and requires token authentication. You need to pass the `Authorization: Bearer` header."
       operationId: unScaleVm
       requestBody:
         content:
@@ -6123,7 +6370,7 @@ paths:
       tags:
         - VMs
       summary: "Check user's VM status (Admin)"
-      description: "Get a detailed status of the VM specified by the name in the endpoint. The VM might belong to another user. This operation requires administrative privileges.\n\nThis operation requires both token and license authentication. You need to pass both the `orka-licensekey: <license>` and `Authorization: Bearer <token>` headers."
+      description: "Get a detailed status of the VM specified by the name or by ID in the endpoint. The VM might belong to another user. This operation requires administrative privileges.\n\nThis operation requires both token and license authentication. You need to pass both the `orka-licensekey:` and `Authorization: Bearer` headers."
       operationId: checkUserSVmStatusAdmin
       responses:
         "200":
@@ -6148,6 +6395,9 @@ paths:
                     items:
                       type: object
                       properties:
+                        RAM:
+                          type: string
+                          example: 10.00G
                         base_image:
                           type: string
                           example: "{{baseImage}}"
@@ -6157,6 +6407,9 @@ paths:
                         cpu:
                           type: number
                           example: 3
+                        gpu_passthrough:
+                          type: boolean
+                          example: false
                         image:
                           type: string
                           example: "{{vm}}"
@@ -6179,9 +6432,11 @@ paths:
                           type: string
                           example: Not Deployed
                     example:
-                      - base_image: "{{baseImage}}"
+                      - RAM: 10.00G
+                        base_image: "{{baseImage}}"
                         configuration_template: default
                         cpu: 3
+                        gpu_passthrough: false
                         image: "{{vm}}"
                         io_boost: false
                         owner: "{{email}}"
@@ -6196,9 +6451,11 @@ paths:
                     help: {}
                     message: ""
                     virtual_machine_resources:
-                      - base_image: "{{baseImage}}"
+                      - RAM: 10.00G
+                        base_image: "{{baseImage}}"
                         configuration_template: default
                         cpu: 3
+                        gpu_passthrough: false
                         image: "{{vm}}"
                         io_boost: false
                         owner: "{{email}}"
@@ -6892,10 +7149,12 @@ tags:
   - name: Images
     description: "All requests in this group, except `generate empty storage`, are related to the management of base images. `generate empty storage` handles the creation of additional storage for your VMs.\n\nA **base image** is an existing bootable disk image file stored in Orka and used exclusively for the creation of VM configurations. The actual storage for newly deployed VMs is based on the base image specified by the user.\n\nBase images remain unchanged over time and can be used again and again for the creation of VMs and VM configurations. To change a base image, you can `commit` the changes from a running VM to it. To optimize a base image for the deployment and booting of a specific VM configuration, you can perform a `live commit`. You can create a new base image by saving the disk image of a deployed VM.\n\nBase images are stored as `.img` files in the Orka storage. Base images live in the Image Manager namespace and are shared across the same Orka environment. All users can access them and use them to create VM configurations."
   - name: ISOs
-    description: All requests in this group are related to the management of ISO files used for installing macOS.
+    description: "All requests in this group are related to the management of ISO files used for installing macOS.\n\n> **NOTE**: All ISO requests are supported for Intel nodes only."
   - name: Kube-Accounts
     description: "All requests in this group are related to the management of kube-accounts.\n\nA **kube-account** is a Kubernetes service account used for the management of a node with `kubectl`. Each kube-account has a `kubeconfig`."
-  - name: Logs
+  - name: Logs 1.0 (deprecated)
+    description: "> NOTE: Logs 1.0 is **deprecated** and will be removed in the future.  \n> Check Logs 2.0 and all its benefits.\n\nAll requests in this group are related to the management of the logs for your Orka environment. The logs provide detailed information about every CLI command or API request executed against the environment."
+  - name: Logs 2.0
     description: All requests in this group are related to the management of the logs for your Orka environment. The logs provide detailed information about every CLI command or API request executed against the environment.
   - name: Environment Checks
     description: "All requests in this group are related to Orka environment checks such as token and license key validation, and health checks."
